@@ -36,12 +36,18 @@ def make_bonds(coordinates, no_monomers):
     #this is a monster but exactly what I want
     chains = coordinates.index.get_level_values('chain').drop_duplicates()
 
+    bond_rep = []
     for i in chains:
-        query
-    
-    
 
+        #chain | (atom_i, atom_j) 
+        #should make a chain of 3 and 4 atoms and test to see if this method makes the correct dataframe
+        bonds_list = [(i, i+1) for i in range(1, len(coordinates.loc[i]))]
+        bonds = pd.DataFrame(data=bonds_list, index=[i])
+        bond_rep.append(bonds)
 
+    return pd.concat(bond_rep)
+
+#should make a function that can take in a set of coordinates, chain number, 
 rand_seed = 69420
 data = {
     'x':[1.0,1.05,1.2],
@@ -65,9 +71,10 @@ merged = pd.concat([
     pd.DataFrame(fudged.values, multi_dex_2)
 ])
 merged.sort_index(level='chain', inplace=True)
+merged.rename(columns={0:'x', 1:'y', 2:'z'}, inplace=True)
 
 a = make_bonds(merged, 2)
-
+print(a)
 
 """
 fig = plt.figure()
