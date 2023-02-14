@@ -1,5 +1,5 @@
 from sympy import *
-
+from backmap import backmap as bm
 import numpy as np
 import math as math
 import time
@@ -9,34 +9,12 @@ import random
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
-def fudge_position(data, radius):
-    """
-    the radius being divided by 100 will need to change
-    """
-    #fudgers = [[random.uniform(-radius/500, radius/500) for i in range(3)] for i in range(len(data))]
-    fudgers = [[radius/10 for i in range(3)] for i in range(len(data))]
-    fudgers = pd.DataFrame(fudgers, columns=['x','y','z'])
-
-    new_data = data + fudgers
-
-    return new_data
-
-def gen_multidex(no_dex):
-
-    #i'm just going to duplicate the code below but should try to be more clever later
-    m1 = [(x,1) for x in range(len(no_dex))]
-    m2 = [(x,2) for x in range(len(no_dex))]
-    
-    multi_dex_1 = pd.MultiIndex.from_tuples(m1, names=['chain', 'atom'])
-    multi_dex_2 = pd.MultiIndex.from_tuples(m2, names=['chain', 'atom'])
-
-    return multi_dex_1, multi_dex_2
-
 def make_bonds(coordinates, no_monomers):
     #this is a monster but exactly what I want
     chains = coordinates.index.get_level_values('chain').drop_duplicates()
 
     bond_rep = []
+    multidex_rep = []
     for i in chains:
 
         #chain | (atom_i, atom_j) 
@@ -56,15 +34,24 @@ data = {
 }
 
 init_coordinate = pd.DataFrame(data, columns=data.keys())
-radius = 5
+#init_coordinate.index.name = 'chain'
+print(init_coordinate)
+radius = 1
 volume = np.pi * radius ** 2
 
+backmapped = bm.backmap(init_coordinate)
+#print(backmapped)
+backmap_2 = bm.backmap(backmapped)
+#print(backmap_2)
 
-multi_dex_1, multi_dex_2 = gen_multidex(range(len(init_coordinate)))
+"""
 df2 = pd.DataFrame(init_coordinate)
-fudged = pd.DataFrame(fudge_position(df2, radius=radius))
+print(df2)
+fudged = pd.DataFrame(bm.fudge_position(df2, radius=radius))
+print('fudged')
+print(fudged)
 
-multi_dex_1, multi_dex_2 = gen_multidex(range(len(df2)))
+multi_dex_1, multi_dex_2 = bm.gen_multidex(range(len(df2)))
 
 merged = pd.concat([
     pd.DataFrame(df2.values, multi_dex_1),
@@ -72,9 +59,12 @@ merged = pd.concat([
 ])
 merged.sort_index(level='chain', inplace=True)
 merged.rename(columns={0:'x', 1:'y', 2:'z'}, inplace=True)
-
-a = make_bonds(merged, 2)
-print(a)
+print('merged \n')
+print(merged)
+fudged = pd.DataFrame(bm.fudge_position(merged, radius=1))
+print('fudged 2\n')
+print(fudged)
+"""
 
 """
 fig = plt.figure()
