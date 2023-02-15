@@ -35,7 +35,7 @@ data = {
 
 init_coordinate = pd.DataFrame(data, columns=data.keys())
 #init_coordinate.index.name = 'chain'
-print(init_coordinate)
+
 radius = 1
 volume = np.pi * radius ** 2
 
