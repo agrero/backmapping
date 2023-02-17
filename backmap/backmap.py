@@ -2,6 +2,7 @@ import numpy as np
 import time
 import pandas as pd
 import random
+import time
 
 def fudge_position(data, radius=1):
     """
@@ -25,18 +26,17 @@ def gen_multidex(no_dex):
     
     #correctly formatting indices
     if no_dex.index.names != ['chain', 'atom']:
-        print('Incorrect format detected, rectifying the situation!')
-        print('Assuming each coordinate is its own chain.')
+        #print('Incorrect format detected, rectifying the situation!')
+        #print('Assuming each coordinate is its own chain.')
         m = [(x,1) for x in range(len(no_dex))]
         multidex = pd.MultiIndex.from_tuples(m, names=['chain','atom'])
         no_dex = pd.DataFrame(data=no_dex.values, index=multidex)
     #maybe make this work for non homogenous systems later
-    print('Assuming a homogenous system')
-    no_mono = int(no_dex.index.get_level_values('atom').max()) 
-    no_chains = int(no_dex.index.get_level_values('chain').max()) + 1
-    print(f"chain number:\t{no_chains}\nmonomer number:\t{no_mono}")
-    #rewrite this as a comprehension later
-    tup_rep = []
+    #print('Assuming a homogenous system')
+    no_mono = len(no_dex.index.get_level_values('atom').unique())
+    no_chains = len(no_dex.index.get_level_values('chain').unique())
+    #print(f"chain number:\t{no_chains}\nmonomer number:\t{no_mono}")
+
 
     m1 = [[(i, 2*x) for x in range(no_mono)] for i in range(no_chains)]
     m1 = sum(m1, [])
@@ -47,23 +47,19 @@ def gen_multidex(no_dex):
     multidex_1 = pd.MultiIndex.from_tuples(m1, names=['chain', 'atom'])
     multidex_2 = pd.MultiIndex.from_tuples(m2, names=['chain', 'atom'])
 
-    print(multidex_1)
-    print(multidex_2)
-
     return multidex_1, multidex_2
 
 def backmap(input_coordinates):
 
     multidex_1, multidex_2 = gen_multidex(input_coordinates)
     fudged = pd.DataFrame(fudge_position(input_coordinates))
-    print(fudged)
+
     merged = pd.concat([
         pd.DataFrame(input_coordinates.values, multidex_1),
         pd.DataFrame(fudged.values, multidex_2)
     ])
     merged.sort_index(level='chain', inplace=True)
     merged.rename(columns={0:'x', 1:'y', 2:'z'}, inplace=True)
-    print(merged)
 
     return merged
 

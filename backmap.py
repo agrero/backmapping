@@ -9,6 +9,8 @@ import random
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
+import timeit
+
 def make_bonds(coordinates, no_monomers):
     #this is a monster but exactly what I want
     chains = coordinates.index.get_level_values('chain').drop_duplicates()
@@ -39,10 +41,8 @@ init_coordinate = pd.DataFrame(data, columns=data.keys())
 radius = 1
 volume = np.pi * radius ** 2
 
-backmapped = bm.backmap(init_coordinate)
-#print(backmapped)
-backmap_2 = bm.backmap(backmapped)
-#print(backmap_2)
+
+
 
 """
 df2 = pd.DataFrame(init_coordinate)
