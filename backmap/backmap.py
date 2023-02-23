@@ -49,6 +49,23 @@ def gen_multidex(no_dex):
 
     return multidex_1, multidex_2
 
+def make_bonds(coordinates, no_monomers):
+    #this is a monster but exactly what I want
+    chains = coordinates.index.get_level_values('chain').drop_duplicates()
+
+    bond_rep = []
+    multidex_rep = []
+    for i in chains:
+
+        #chain | (atom_i, atom_j) 
+        #should make a chain of 3 and 4 atoms and test to see if this method makes the correct dataframe
+        bonds_list = [(i, i+1) for i in range(1, len(coordinates.loc[i]))]
+        bonds = pd.DataFrame(data=bonds_list, index=[i])
+        bond_rep.append(bonds)
+
+    return pd.concat(bond_rep)
+
+
 def backmap(input_coordinates):
 
     multidex_1, multidex_2 = gen_multidex(input_coordinates)
