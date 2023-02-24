@@ -15,11 +15,12 @@ for i in range(2):
 #print(backmapped)
 bonds = bm.make_bonds(backmapped)
 coord = bm.reconfig_frame(coordinates=backmapped)
-
 angles = bm.make_angles(backmapped)
-print(angles)
+dihedrals = bm.make_dihedrals(backmapped)
 
 
-#hilo = [[-10,10],[-10,10],[-10,10]]
-#bm.write_lammps_input(coord, hilo, 17.0)
+
+
+hilo = [[-10,10],[-10,10],[-10,10]]
+bm.write_lammps_input(coord, bonds, angles, dihedrals, hilo, 17.0)
 

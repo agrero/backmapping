@@ -81,14 +81,51 @@ def make_angles(coordinates):
     """
     stop being a lazy programmer
 
-    on hold for the moment
+    no longer on hold but still being lazy
     """
     at_p_chain = coordinates.index.get_level_values('atom').drop_duplicates().max()
-    angle_atoms = [[i, i+1, i+2] for i in range(at_p_chain - 1)]
+    angle_atoms = []
+    #can likely rewrite this with a comprehension, as well as remove the if statement
+    for i, j in enumerate(list(range(0, len(coordinates) - at_p_chain, at_p_chain))):
+        if j == 0:
+            for x in range(j, (at_p_chain * (i+1)-1)):
+                new_atoms = [x, x+1, x+2]
+                angle_atoms.append(new_atoms)
+        else:
+            for x in range(j+1, at_p_chain * (i+1)+1):
+                new_atoms = [x, x+1, x+2]
+                angle_atoms.append(new_atoms)
+    header = ['ai', 'aj', 'ak']
+    angle_frame = pd.DataFrame(angle_atoms, columns=header)
+    typ_array = [1] * (len(angle_frame))
+    angle_frame.insert(1, 'type', typ_array)
+
+    return angle_frame
+    
 
 def make_dihedrals(coordinates):
     #index | type | ai | aj | ak | al
-    pass
+    """
+    wow this looks familiar
+    """
+    at_p_chain = coordinates.index.get_level_values('atom').drop_duplicates().max()
+    angle_atoms = []
+    #can likely rewrite this with a comprehension, as well as remove the if statement
+    for i, j in enumerate(list(range(0, len(coordinates) - at_p_chain, at_p_chain))):
+        if j == 0:
+            for x in range(j, (at_p_chain * (i+1)-2)):
+                new_atoms = [x, x+1, x+2, x+3]
+                angle_atoms.append(new_atoms)
+        else:
+            for x in range(j+1, at_p_chain * (i+1)):
+                new_atoms = [x, x+1, x+2, x+3]
+                angle_atoms.append(new_atoms)
+    header = ['ai', 'aj', 'ak', 'al']
+    dihedral_frame = pd.DataFrame(angle_atoms, columns=header)
+    typ_array = [1] * (len(dihedral_frame))
+    dihedral_frame.insert(0, 'type', typ_array)
+
+    return dihedral_frame
     
 
 
@@ -108,32 +145,53 @@ def backmap(input_coordinates):
 
     return merged
 
-def write_lammps_input(coordinates, hi_lo, mass):
+def write_lammps_input(coordinates, bonds, angles, dihedrals, hi_lo, mass):
     no_atoms = len(coordinates)
+    no_bonds = len(bonds)
+    no_angles = len(angles)
+    no_dihedrals = len(dihedrals)
     no_atom_types = 1
 
     xlo, xhi = hi_lo[0][0], hi_lo[0][1]
     ylo, yhi = hi_lo[1][0], hi_lo[1][1]
     zlo, zhi = hi_lo[2][0], hi_lo[2][1]
-    header = f"""
-LAMMPS UA chain data file\n
-{no_atoms} atoms\n
+    header = f"""LAMMPS UA chain data file\n
+{no_atoms} atoms
+{no_bonds} bonds
+{no_angles} angles
+{no_dihedrals} dihedrals\n
 {no_atom_types} atom types\n
 {xlo} {xhi} xlo xhi
 {ylo} {yhi} ylo yhi
 {zlo} {zhi} zlo zhi\n
 {'Masses'}\n
-{'1'} {mass}\n
+{'1'} {mass}
 """
 
     #there may be a better way to do this but i just need it
     #to work
     with open('header_test.txt', 'w') as f:
-        f.write(f'{header}\nAtoms\n')
-        f.write('\n')
+        f.write(f'{header}\nAtoms\n\n')
+
 
     coordinates.round(4).to_csv('header_test.txt', sep='\t', mode='a', header=False)
-        
+
+    with open('header_test.txt', 'a') as f:
+        f.write('\nBonds\n\n')
+    
+    bonds.to_csv('header_test.txt', sep='\t', mode='a', header=False)
+
+    with open('header_test.txt', 'a') as f:
+        f.write('\nAngles\n\n')
+    
+    angles.to_csv('header_test.txt', sep='\t', mode='a', header=False)
+
+    with open('header_test.txt', 'a') as f:
+        f.write('\nDihedrals\n\n')
+    
+    dihedrals.to_csv('header_test.txt', sep='\t', mode='a', header=False)
+
+
 
 
 
