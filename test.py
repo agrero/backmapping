@@ -19,8 +19,17 @@ angles = bm.make_angles(backmapped)
 dihedrals = bm.make_dihedrals(backmapped)
 
 
-
-
 hilo = [[-10,10],[-10,10],[-10,10]]
-bm.write_lammps_input(coord, bonds, angles, dihedrals, hilo, 17.0)
+bm.write_lammps_input('test.txt',coord, bonds, angles, dihedrals, hilo, 17.0)
 
+components = ['Atoms', 'Bonds', 'Angles', 'Dihedrals']
+yes = bm.read_lammps('test.txt', components)
+print(yes)
+
+back_yes = bm.backmap(yes)
+bonds_2 = bm.make_bonds(back_yes)
+coord_2 = bm.reconfig_frame(back_yes)
+angles_2 = bm.make_angles(back_yes)
+dihedrals_2 = bm.make_dihedrals(back_yes)
+
+bm.write_lammps_input('test_2.txt', coord_2, bonds_2, angles_2, dihedrals_2, hilo, 17.0)

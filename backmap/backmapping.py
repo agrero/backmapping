@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import random
 import time
+import os
 
 def fudge_position(data, radius=1):
     """
@@ -145,7 +146,7 @@ def backmap(input_coordinates):
 
     return merged
 
-def write_lammps_input(coordinates, bonds, angles, dihedrals, hi_lo, mass):
+def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, mass):
     no_atoms = len(coordinates)
     no_bonds = len(bonds)
     no_angles = len(angles)
@@ -170,28 +171,65 @@ def write_lammps_input(coordinates, bonds, angles, dihedrals, hi_lo, mass):
 
     #there may be a better way to do this but i just need it
     #to work
-    with open('header_test.txt', 'w') as f:
+    with open(filename, 'w') as f:
         f.write(f'{header}\nAtoms\n\n')
 
 
-    coordinates.round(4).to_csv('header_test.txt', sep='\t', mode='a', header=False)
+    coordinates.round(4).to_csv(filename, sep='\t', mode='a', header=False)
 
-    with open('header_test.txt', 'a') as f:
+    with open(filename, 'a') as f:
         f.write('\nBonds\n\n')
     
-    bonds.to_csv('header_test.txt', sep='\t', mode='a', header=False)
+    bonds.to_csv(filename, sep='\t', mode='a', header=False)
 
-    with open('header_test.txt', 'a') as f:
+    with open(filename, 'a') as f:
         f.write('\nAngles\n\n')
     
-    angles.to_csv('header_test.txt', sep='\t', mode='a', header=False)
+    angles.to_csv(filename, sep='\t', mode='a', header=False)
 
-    with open('header_test.txt', 'a') as f:
+    with open(filename, 'a') as f:
         f.write('\nDihedrals\n\n')
     
-    dihedrals.to_csv('header_test.txt', sep='\t', mode='a', header=False)
+    dihedrals.to_csv(filename, sep='\t', mode='a', header=False)
 
+def read_lammps(filename, components):
+    """
+    Components are the components of the specific lammps file. IE Atoms, Bonds, Dihedrals.
+    """
+    with open(filename, 'r') as f:
+        text = f.read()
+        sections = text.split('\n')
+        section_ndxs = [sections.index(i) for i in components]
 
+        comp = []
+        #header = sections[0:section_ndxs[0]]
 
+        for ndx, i in enumerate(section_ndxs):
+            try:
+                slice = sections[i:section_ndxs[ndx+1]]
+                comp.append(slice)
+            except:
+                slice = sections[i:]
+                comp.append(slice)
+        
+        clean_sections = []
+        for i in comp:
+            ndxs = [1,-1]
+            for j in ndxs:
+                del i[j]
+            clean_sections.append(i)
+        #can change this later but will only return atoms for backmapping
+        atoms = clean_sections[0][1:]
+        cleaned_atoms = []
+        for i in atoms:
+            cleaned_atoms.append(i.split('\t'))
+        columns = ['atom', 'chain', 'atom type', 'x', 'y', 'z']
+        atom_frame = pd.DataFrame(data=cleaned_atoms, columns=columns)
+        multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
+        atom_frame.drop(['chain', 'atom','atom type'], axis=1, inplace=True)
+
+        atom_frame = pd.DataFrame(atom_frame.values, index=multidex, columns=['x','y','z']).astype(float)
+
+        return atom_frame
 
 
