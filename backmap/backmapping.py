@@ -26,16 +26,16 @@ def gen_multidex(no_dex):
 
     #correctly formatting indices
     if no_dex.index.names != ['chain', 'atom']:
-        #print('Incorrect format detected, rectifying the situation!')
-        #print('Assuming each coordinate is its own chain.')
+        print('Incorrect format detected, rectifying the situation!')
+        print('Assuming each coordinate is its own chain.')
         m = [(x,1) for x in range(len(no_dex))]
         multidex = pd.MultiIndex.from_tuples(m, names=['chain','atom'])
         no_dex = pd.DataFrame(data=no_dex.values, index=multidex)
     #maybe make this work for non homogenous systems later
-    #print('Assuming a homogenous system')
+    print('Assuming a homogenous system')
     no_mono = len(no_dex.index.get_level_values('atom').unique())
     no_chains = len(no_dex.index.get_level_values('chain').unique())
-    #print(f"chain number:\t{no_chains}\nmonomer number:\t{no_mono}")
+    print(f"chain number:\t{no_chains}\nmonomer number:\t{no_mono}")
 
 
     m1 = [[(i, 2*x) for x in range(no_mono)] for i in range(no_chains)]
