@@ -6,7 +6,13 @@ import os
 
 def fudge_position(data, radius=1):
     """
-    the radius being divided by 100 will need to change
+    data: this is a dataframe of xyz coordinates
+    radius: the distance range of which to 'fudge' the coordinates
+
+    duplicates the input data frame and 'fudges' each position at a distance between
+    the -radius and +radius. 
+
+    Returns a 'fudged' dataframe of the original input dataframe.
     """
     fudgers = [[random.uniform(-radius, radius) for i in range(3)] for i in range(len(data))]
 
@@ -17,12 +23,18 @@ def fudge_position(data, radius=1):
     return new_data
 
 def gen_multidex(no_dex):
-    """input needs to be formatted with a chain and the atom count will be inferred
-    should put something in there that
     """
-    #i'm just going to duplicate the code below but should try to be more clever later
-    #need to do this with a loop based on how many atoms are in a chain
+    no_dex: a dataframe minimally containing x, y, and z coordinates
 
+    if the dataframe is not formatted with a chain and atom multidex it will
+    automatically generate said starting multidex. 
+
+    backmaps each atom (of a homogenous system) by effectively doubling the length
+    of the given dataframe. it will then generate two lists of indices
+    of atoms n and n+1. it will maintain the chain # for each of the atoms.
+
+    returns two multidexes as described earlier.
+    """
 
     #correctly formatting indices
     if no_dex.index.names != ['chain', 'atom']:
@@ -31,6 +43,7 @@ def gen_multidex(no_dex):
         m = [(x,1) for x in range(len(no_dex))]
         multidex = pd.MultiIndex.from_tuples(m, names=['chain','atom'])
         no_dex = pd.DataFrame(data=no_dex.values, index=multidex)
+        
     #maybe make this work for non homogenous systems later
     print('Assuming a homogenous system')
     no_mono = len(no_dex.index.get_level_values('atom').unique())
@@ -50,6 +63,13 @@ def gen_multidex(no_dex):
     return multidex_1, multidex_2
 
 def make_bonds(coordinates):
+    """
+    coordinates: a dataframe containing x, y, and z coordinates. indexed with a 
+    chain and atom multidex.
+
+    outputs a dataframe formatted as: index | type | ai | aj
+    with ai and aj being the initial and final atoms in the bond
+    """
     #index | type | ai | aj
     #retrieve the number of chains and how long each chain is
     chains = coordinates.index.get_level_values('chain').drop_duplicates()
@@ -70,6 +90,12 @@ def make_bonds(coordinates):
     return pd.DataFrame(bond_dict)
 
 def reconfig_frame(coordinates):
+    """
+    coordinates: an x, y, and z coordinates dataframe
+
+    reconfigures a frame so that the indexing is more in line with a lammps input 
+    file by changing the index position and adding an atom type column.
+    """
     df = coordinates.reset_index()
     df.drop(labels='atom', axis=1, inplace=True)
     typ_array = [1] * (len(df))

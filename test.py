@@ -30,5 +30,6 @@ bonds_2 = bm.make_bonds(back_yes)
 coord_2 = bm.reconfig_frame(back_yes)
 angles_2 = bm.make_angles(back_yes)
 dihedrals_2 = bm.make_dihedrals(back_yes)
-
-bm.write_lammps_input('lammps_input', coord_2, bonds_2, angles_2, dihedrals_2, hilo, 17.0)
+# likely need to chagne the input here for the reading file as the 
+# chain number is 384 and only one monomer and this should be changed
+bm.write_lammps_input('lammps_input.txt', coord_2, bonds_2, angles_2, dihedrals_2, hilo, 17.0)
