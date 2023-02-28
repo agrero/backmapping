@@ -43,27 +43,29 @@ srun lmp < in.PEequil > OUTequil
 
 cp FINALCONFIG RESTART
 
-PYTHON SCRIPT GOES HERE
+#PYTHON SCRIPT GOES HERE
+python3 test.py
+
 
 # unsure if we run this next line
 #srun lmp < in.PEprod > OUTprod
 
-mkdir 0ns
-cp dump.xyz.dat  $BD/0ns/
+#mkdir 0ns
+#cp dump.xyz.dat  $BD/0ns/
 # cp dump.velo.dat       $BD/0ns/
-cp log.lammps          $BD/0ns/
-cp FINALCONFIG         $BD/0ns/
-cp FINALCONFIG RESTART
+#cp log.lammps          $BD/0ns/
+#cp FINALCONFIG         $BD/0ns/
+#cp FINALCONFIG RESTART
 
-for ((K=1;K<=100;K++)); do
-    cd $BD
-    srun lmp < in.PEprod > OUTprod
-    mkdir ${K}ns
-    cp dump.xyz.dat  $BD/${K}ns/
-#   cp dump.velo.dat       $BD/${K}ns/
-    cp log.lammps          $BD/${K}ns/
-    cp FINALCONFIG         $BD/${K}ns/
-    cp FINALCONFIG RESTART
+#for ((K=1;K<=100;K++)); do
+#    cd $BD
+#    srun lmp < in.PEprod > OUTprod
+#    mkdir ${K}ns
+#    cp dump.xyz.dat  $BD/${K}ns/
+#    cp dump.velo.dat       $BD/${K}ns/
+#    cp log.lammps          $BD/${K}ns/
+#    cp FINALCONFIG         $BD/${K}ns/
+#    cp FINALCONFIG RESTART
 
 done
 

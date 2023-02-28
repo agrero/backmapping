@@ -220,6 +220,9 @@ def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, m
 
 def read_lammps(filename, components):
     """
+    The first line of these out files aren't consistent so should just make the header the 
+    initial row to the first section (Atoms # molecular) 
+
     Components are the components of the specific lammps file. IE Atoms, Bonds, Dihedrals.
     """
     with open(filename, 'r') as f:
@@ -246,10 +249,13 @@ def read_lammps(filename, components):
                 del i[j]
             clean_sections.append(i)
         #can change this later but will only return atoms for backmapping
-        atoms = clean_sections[0][1:]
+        atoms = clean_sections[1][1:]
         cleaned_atoms = []
         for i in atoms:
             cleaned_atoms.append(i.split('\t'))
+
+        print(atoms)
+
         columns = ['atom', 'chain', 'atom type', 'x', 'y', 'z']
         atom_frame = pd.DataFrame(data=cleaned_atoms, columns=columns)
         multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
