@@ -14,11 +14,15 @@ def fudge_position(data, radius=1):
 
     Returns a 'fudged' dataframe of the original input dataframe.
     """
+    print('fudging location values')
+    t0 = time.process_time_ns()
     fudgers = [[random.uniform(-radius, radius) for i in range(3)] for i in range(len(data))]
 
     fudgers = pd.DataFrame(fudgers, columns=['x','y','z'])
 
     new_data = data.values + fudgers
+    t1 = time.process_time_ns()
+    print(f'fudged locations in: {t1-t0}ns\n')
 
     return new_data
 
@@ -37,30 +41,34 @@ def gen_multidex(no_dex):
     """
 
     #correctly formatting indices
-    if no_dex.index.names != ['chain', 'atom']:
-        print('Incorrect format detected, rectifying the situation!')
-        print('Assuming each coordinate is its own chain.')
+    print('indexing atoms')
+    t0 = time.process_time_ns()
+    if no_dex.index.names != ['atom', 'chain']:
+        print('incorrect format detected, rectifying the situation!')
+        print('assuming each coordinate is its own chain.')
         m = [(x,1) for x in range(len(no_dex))]
         multidex = pd.MultiIndex.from_tuples(m, names=['chain','atom'])
         no_dex = pd.DataFrame(data=no_dex.values, index=multidex)
         
     #maybe make this work for non homogenous systems later
-    print('Assuming a homogenous system')
+    print('assuming a homogenous system')
     no_mono = len(no_dex.index.get_level_values('atom').unique())
     no_chains = len(no_dex.index.get_level_values('chain').unique())
+    chain_length = int(no_mono / no_chains)
     print(f"chain number:\t{no_chains}\nmonomer number:\t{no_mono}")
 
+    chain = sum([[x+1] * chain_length for x in range(0, no_chains)], [])
+    atom_1 = [2*x for x in range(no_mono)]
+    atom_2 = [2*x+1 for x in range(no_mono)]
 
-    m1 = [[(i, 2*x) for x in range(no_mono)] for i in range(no_chains)]
-    m1 = sum(m1, [])
-
-    m2 = [[(i, 2*x+1) for x in range(no_mono)] for i in range(no_chains)]
-    m2 = sum(m2, [])
+    m1 = [(chain[i], atom_1[i]) for i in range(0, len(atom_1))]
+    m2 = [(chain[i], atom_2[i]) for i in range(0, len(atom_2))]
 
     multidex_1 = pd.MultiIndex.from_tuples(m1, names=['chain', 'atom'])
     multidex_2 = pd.MultiIndex.from_tuples(m2, names=['chain', 'atom'])
-
-    return multidex_1, multidex_2
+    t1 = time.process_time_ns()
+    print(f'multidex assembled in: {t1-t0}ns\n')
+    return multidex_1, multidex_2   
 
 def make_bonds(coordinates):
     """
@@ -72,22 +80,22 @@ def make_bonds(coordinates):
     """
     #index | type | ai | aj
     #retrieve the number of chains and how long each chain is
-    chains = coordinates.index.get_level_values('chain').drop_duplicates()
-    at_p_chain = coordinates.index.get_level_values('atom').drop_duplicates().max()
+    print('assembling bonds')
+    t0=time.process_time_ns()
+    no_mono = len(coordinates.index.get_level_values('atom').unique())
+    no_chains = len(coordinates.index.get_level_values('chain').unique())
+    chain_length = int(no_mono/no_chains)
 
-    resized_chains = list(chains) * (at_p_chain)
-    resized_chains.sort()
-    ai = [i for i in range(0, at_p_chain)] * len(chains)
-    aj = [i for i in range(1, at_p_chain + 1)] * len(chains)
-    type_array = [1] * len(ai)
+    ai = []
+    for dn in range(no_chains):
+        for n in range(chain_length-1):
+            ai.append((1, n + dn*chain_length, n + dn*chain_length+1))
 
-    bond_dict ={
-        'type' : type_array,
-        'ai': ai,
-        'aj': aj
-    }
-
-    return pd.DataFrame(bond_dict)
+    
+    bond_frame = pd.DataFrame(ai, columns=['type','ai','aj'])
+    t1 = time.process_time_ns()
+    print(f'bonds assembled in: {t1-t0}ns\n')
+    return bond_frame
 
 def reconfig_frame(coordinates):
     """
@@ -96,61 +104,64 @@ def reconfig_frame(coordinates):
     reconfigures a frame so that the indexing is more in line with a lammps input 
     file by changing the index position and adding an atom type column.
     """
+    print('reconfiguring frame')
+    t0=time.process_time_ns()
     df = coordinates.reset_index()
     df.drop(labels='atom', axis=1, inplace=True)
     typ_array = [1] * (len(df))
     df.insert(1, 'type', typ_array)
-
+    t1=time.process_time_ns()
+    print(f'frame reconfigured in: {t1-t0}ns\n')
     return df
 
 def make_angles(coordinates):
-    #index | type | ai | aj | ak
     """
-    stop being a lazy programmer
+    coordinates: a dataframe containing x, y, and z coordinates. indexed with a 
+    chain and atom multidex.
 
-    no longer on hold but still being lazy
-    """
-    at_p_chain = coordinates.index.get_level_values('atom').drop_duplicates().max()
-    angle_atoms = []
-    #can likely rewrite this with a comprehension, as well as remove the if statement
-    for i, j in enumerate(list(range(0, len(coordinates) - at_p_chain, at_p_chain))):
-        if j == 0:
-            for x in range(j, (at_p_chain * (i+1)-1)):
-                new_atoms = [x, x+1, x+2]
-                angle_atoms.append(new_atoms)
-        else:
-            for x in range(j+1, at_p_chain * (i+1)+1):
-                new_atoms = [x, x+1, x+2]
-                angle_atoms.append(new_atoms)
-    header = ['ai', 'aj', 'ak']
-    angle_frame = pd.DataFrame(angle_atoms, columns=header)
-    typ_array = [1] * (len(angle_frame))
-    angle_frame.insert(1, 'type', typ_array)
+    outputs a dataframe formatted as: index | type | ai | aj | ak
+    with ai and aj being the initial and final atoms in the bond
+        """
+    #index | type | ai | aj
+    #retrieve the number of chains and how long each chain is
+    print('assembling angles')
+    t0 = time.process_time_ns()
+    no_mono = len(coordinates.index.get_level_values('atom').unique())
+    no_chains = len(coordinates.index.get_level_values('chain').unique())
+    chain_length = int(no_mono/no_chains)
+
+    ai = []
+    for dn in range(no_chains):
+        for n in range(chain_length-2):
+            ai.append((1, n + dn*chain_length, n + dn*chain_length+1,n + dn*chain_length+2))
+    t1 = time.process_time_ns()
+    
+    angle_frame = pd.DataFrame(ai, columns=['type','ai','aj','ak'])
+
+    print(f'angles assembled in: {t1-t0}ns\n')
 
     return angle_frame
-    
+
+
 
 def make_dihedrals(coordinates):
     #index | type | ai | aj | ak | al
     """
     wow this looks familiar
     """
-    at_p_chain = coordinates.index.get_level_values('atom').drop_duplicates().max()
-    angle_atoms = []
-    #can likely rewrite this with a comprehension, as well as remove the if statement
-    for i, j in enumerate(list(range(0, len(coordinates) - at_p_chain, at_p_chain))):
-        if j == 0:
-            for x in range(j, (at_p_chain * (i+1)-2)):
-                new_atoms = [x, x+1, x+2, x+3]
-                angle_atoms.append(new_atoms)
-        else:
-            for x in range(j+1, at_p_chain * (i+1)):
-                new_atoms = [x, x+1, x+2, x+3]
-                angle_atoms.append(new_atoms)
-    header = ['ai', 'aj', 'ak', 'al']
-    dihedral_frame = pd.DataFrame(angle_atoms, columns=header)
-    typ_array = [1] * (len(dihedral_frame))
-    dihedral_frame.insert(0, 'type', typ_array)
+    print('assembling dihedrals')
+    t0=time.process_time_ns()
+    no_mono = len(coordinates.index.get_level_values('atom').unique())
+    no_chains = len(coordinates.index.get_level_values('chain').unique())
+    chain_length = int(no_mono/no_chains)
+
+    ai = []
+    for dn in range(no_chains):
+        for n in range(chain_length-3):
+            ai.append((1, n + dn*chain_length, n + dn*chain_length+1,n + dn*chain_length+2, n + dn*chain_length+3))
+    dihedral_frame = pd.DataFrame(ai, columns=['type','ai','aj','ak', 'al'])
+    t1=time.process_time_ns()
+    print(f'dihedrals assembled in: {t1-t0}ns\n')
 
     return dihedral_frame
     
@@ -158,10 +169,12 @@ def make_dihedrals(coordinates):
 
 def backmap(input_coordinates):
 
+    print('beginning backmapping\n')
+    t0=time.process_time_ns()
     multidex_1, multidex_2 = gen_multidex(input_coordinates)
     
     fudged = pd.DataFrame(fudge_position(input_coordinates))
-    typ_array = pd.Series(([1] * (len(fudged) * 2)))
+  
 
     merged = pd.concat([
         pd.DataFrame(input_coordinates.values, multidex_1),
@@ -170,6 +183,8 @@ def backmap(input_coordinates):
     merged.sort_index(level='chain', inplace=True)
     merged.rename(columns={0:'x', 1:'y', 2:'z'}, inplace=True)
 
+    t1=time.process_time_ns()
+    print(f'backmapping completed in: {t1-t0}ns\n')
     return merged
 
 def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, mass):
@@ -201,22 +216,22 @@ def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, m
         f.write(f'{header}\nAtoms\n\n')
 
 
-    coordinates.round(4).to_csv(filename, sep='\t', mode='a', header=False)
+    coordinates.round(4).to_csv(filename, sep=' ', mode='a', header=False)
 
     with open(filename, 'a') as f:
         f.write('\nBonds\n\n')
     
-    bonds.to_csv(filename, sep='\t', mode='a', header=False)
+    bonds.to_csv(filename, sep=' ', mode='a', header=False)
 
     with open(filename, 'a') as f:
         f.write('\nAngles\n\n')
     
-    angles.to_csv(filename, sep='\t', mode='a', header=False)
+    angles.to_csv(filename, sep=' ', mode='a', header=False)
 
     with open(filename, 'a') as f:
         f.write('\nDihedrals\n\n')
     
-    dihedrals.to_csv(filename, sep='\t', mode='a', header=False)
+    dihedrals.to_csv(filename, sep=' ', mode='a', header=False)
 
 def read_lammps(filename, components):
     """
@@ -251,18 +266,22 @@ def read_lammps(filename, components):
         #can change this later but will only return atoms for backmapping
         atoms = clean_sections[1][1:]
         cleaned_atoms = []
+        #i should change it so i'm not writiing files with tabs but instead spaces
         for i in atoms:
-            cleaned_atoms.append(i.split('\t'))
+            cleaned_atoms.append(i.split(' '))
 
-        print(atoms)
+        columns = ['atom', 'chain', 'atom type', 'x', 'y', 'z', 'xv', 'yv', 'zv']
+        try:
+            atom_frame = pd.DataFrame(data=cleaned_atoms, columns=columns)
+        except:
+            for i in atoms:
+                cleaned_atoms.append(i.split('\t'))
+            atom_frame = pd.DataFrame(data=cleaned_atoms, columns=columns)
 
-        columns = ['atom', 'chain', 'atom type', 'x', 'y', 'z']
-        atom_frame = pd.DataFrame(data=cleaned_atoms, columns=columns)
         multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
-        atom_frame.drop(['chain', 'atom','atom type'], axis=1, inplace=True)
+        atom_frame.drop(['chain', 'atom','atom type','xv','yv','zv'], axis=1, inplace=True)
 
         atom_frame = pd.DataFrame(atom_frame.values, index=multidex, columns=['x','y','z']).astype(float)
+        atom_frame.sort_index(level='chain', inplace=True)
 
         return atom_frame
-
-
