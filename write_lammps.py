@@ -4,6 +4,45 @@ def write_lammps_config(config_list, filename):
         for i in config_list:
             f.write(f'{i}\n')
 
+#######
+# Parameters
+#######
+# should likely distinguish between if you're reading a restart 
+# or you're reading an input file
+# need a way to change the mass in here CANNNOT forget to do that 
+param_dict ={
+    'atom_style' : 'molecular', 
+    'boundary': 'p p p',
+    'units' : 'real',
+    'read_data' : 'lammps-AT-config',
+    'read_restart' : 'RESTART',
+    'bond_style' : 'harmonic',
+    'bond_coeff' : '1 450 1.54',
+    'special_bonds' : 'lj 0.0 0.0 0.0 angle no dihedral no',
+    'angle_style' : 'harmonic',
+    'angle_coeff' : '1 61.875 114.00',
+    'dihedral_style' : 'opls',
+    'dihedral_coeff' : '* 1.14110, -0.27084 3.143 0.0',
+    'mass' : '* 14.0',
+    'pair_style' : 'lj/mdf 12.0 14.0',
+    'pair_coeff' : '1 1 0 0.0912 2.95 12.0 14.0',
+    'neigh_modify' : 'every 1 delay 0 cehck yes',
+    'thermo_style' : 'custom step temp press ke pe etotal',
+    'thermo_modify' : 'lost warn',
+    'dump' : 'coords all atom 1 dump.xyz.dat',
+    'dump_modify' : 'coords',
+    'restart' : '10000 restart.dat'
+} 
+# NOT INCLUDED
+    # minimize
+    # run
+    # timestep
+# this is how it should write the parameters
+# we should also not forget to ask if you'd want to write the data at each step
+# in order to make a video!
+for key in param_dict:
+    print(f'{key} {param_dict[key]}')
+
 atom_style = 'atom_style molecular'
 boundary = 'boundary p p p'
 units = 'units real'
@@ -32,13 +71,15 @@ minimize = 'minimize 1.0e-4 1.0e-6 1000 1000'
 thermo_style = 'thermo_style custom step temp press ke pe etotal'
 thermo_modify = 'thermo_modify lost warn'
 
-
 dump = 'dump coords all atom 1 dump.xyz.dat'
 dump_modify = 'dump_modify coords scale no'
 
 restart = 'restart 10000 restart.dat'
 
-#beginning the run
+#######
+# Run Conditions
+#######
+
 timestep = 'timestep 0.02'
 run = 'run 100'
 #ask if you wanna minimize between each run
@@ -63,73 +104,4 @@ stuff_list = [atom_style, boundary, units, read_restart, bond_style, bond_coeff,
               pair_coeff, neigh_modify, thermo_style, thermo_modify, dump, dump_modify, restart, timestep,run, minimize,
               timestep_2, run_2, minimize,timestep_3, run_3, minimize,timestep_4, run_4, write_restart]
 
-write_lammps_config(stuff_list, 'lammps_equil_config')
-"""
-atom_style molecular
-
-boundary p p p
-
-units real
-
-read_restart RESTART
-
-bond_style harmonic
-
-bond_coeff 1 450 1.54
-
-special_bonds lj 0.0 0.0 0.0 angle no dihedral no
-
-angle_style harmonic
-angle_coeff 1 61.875 114.00
-
-dihedral_style opls
-dihedral_coeff * 1.4110 -0.27084 3.143 0.0
-
-mass * 14.0
-
-pair_style lj/mdf 12.0 14.0
-pair_coeff 1 1 0.0912 3.95 12.0 14.0
-
-neigh_modify every 1 delay 0 check yes
-
-minimize 1.0e-4 1.0e-6 1000 1000
-
-thermo_style custom step temp press ke pe etotal
-thermo_modify lost warn
-
-restart 10000 restart.dat
-
-timestep 0.02
-run 100
-
-minimize 1.0e-4 1.0e-6 1000 1000
-timestep 0.08
-run 100
-
-minimize 1.0e-4 1.0e-6 1000 1000
-
-timestep 0.25
-run 100
-
-minimize 1.0e-4 1.0e-6 1000 1000
-
-timestep 0.5
-run 100
-
-minimize 1.0e-4 1.0e-6 1000 1000
-
-timestep 0.75
-run 100
-
-minimize 1.0e-4 1.0e-6 1000 1000
-
-timestep 1.0
-run 100
-
-minimize 1.0e-4 1.0e-6 1000 1000
-
-timestep 1.25
-run 20000
-
-write_restart FINALCONFIG
-"""
+#write_lammps_config(stuff_list, 'lammps_equil_config')
