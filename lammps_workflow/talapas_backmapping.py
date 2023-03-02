@@ -292,3 +292,4 @@ def read_lammps(filename, components):
         atom_frame.sort_index(level='chain', inplace=True)
 
         return atom_frame
+    

@@ -44,7 +44,7 @@ special_bonds lj 0.0 0.0 0.0 angle no dihedral no
 angle_style harmonic
 angle_coeff 1 61.875 114.00
 
- #use if you need to turn off angle interactions for diagnostics/equilibration
+#use if you need to turn off angle interactions for diagnostics/equilibration
 #angle_style none
 
    ##
