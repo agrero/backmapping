@@ -40,3 +40,5 @@ dihedrals = bm.make_dihedrals(backmapped)
 
 hilo = [[-23.471697,23.471697],[-23.471697,23.471697],[-23.471697,23.471697]]
 bm.write_lammps_input('lammps-AT-config',coord, bonds, angles, dihedrals, hilo, 17.0)
+
+#os.system can be used to put things on the console

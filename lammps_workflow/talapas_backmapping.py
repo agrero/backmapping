@@ -4,6 +4,9 @@ import random
 import time
 import os
 
+# with the new way of doing this all through python we 
+# should really get rid of this and go back to the package method 
+
 def fudge_position(data, radius=1):
     """
     data: this is a dataframe of xyz coordinates
