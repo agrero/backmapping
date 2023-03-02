@@ -19,8 +19,9 @@ def fudge_position(data, radius=1):
     fudgers = [[random.uniform(-radius, radius) for i in range(3)] for i in range(len(data))]
 
     fudgers = pd.DataFrame(fudgers, columns=['x','y','z'])
+    data_xyz = data[['x','y','z']]
 
-    new_data = data.values + fudgers
+    new_data = data_xyz.values + fudgers
     t1 = time.process_time_ns()
     print(f'fudged locations in: {t1-t0}ns\n')
 
@@ -58,8 +59,8 @@ def gen_multidex(no_dex):
     print(f"chain number:\t{no_chains}\nmonomer number:\t{no_mono}")
 
     chain = sum([[x+1] * chain_length for x in range(0, no_chains)], [])
-    atom_1 = [2*x for x in range(no_mono)]
-    atom_2 = [2*x+1 for x in range(no_mono)]
+    atom_1 = [1 + 2*x for x in range(no_mono)]
+    atom_2 = [1 + 2*x+1 for x in range(no_mono)]
 
     m1 = [(chain[i], atom_1[i]) for i in range(0, len(atom_1))]
     m2 = [(chain[i], atom_2[i]) for i in range(0, len(atom_2))]
@@ -68,6 +69,7 @@ def gen_multidex(no_dex):
     multidex_2 = pd.MultiIndex.from_tuples(m2, names=['chain', 'atom'])
     t1 = time.process_time_ns()
     print(f'multidex assembled in: {t1-t0}ns\n')
+    
     return multidex_1, multidex_2   
 
 def make_bonds(coordinates):
@@ -89,10 +91,9 @@ def make_bonds(coordinates):
     ai = []
     for dn in range(no_chains):
         for n in range(chain_length-1):
-            ai.append((1, n + dn*chain_length, n + dn*chain_length+1))
+            ai.append((1, n + dn*chain_length + 1, n + dn*chain_length + 2))
 
-    
-    bond_frame = pd.DataFrame(ai, columns=['type','ai','aj'])
+    bond_frame = pd.DataFrame(ai, columns=['type','ai','aj'], index=list(range(1, len(ai) + 1)))
     t1 = time.process_time_ns()
     print(f'bonds assembled in: {t1-t0}ns\n')
     return bond_frame
@@ -106,10 +107,10 @@ def reconfig_frame(coordinates):
     """
     print('reconfiguring frame')
     t0=time.process_time_ns()
-    df = coordinates.reset_index()
-    df.drop(labels='atom', axis=1, inplace=True)
+    df = coordinates
+    df = df.swaplevel(0, 1, axis=0)
     typ_array = [1] * (len(df))
-    df.insert(1, 'type', typ_array)
+    df.insert(0, 'type', typ_array)
     t1=time.process_time_ns()
     print(f'frame reconfigured in: {t1-t0}ns\n')
     return df
@@ -133,10 +134,10 @@ def make_angles(coordinates):
     ai = []
     for dn in range(no_chains):
         for n in range(chain_length-2):
-            ai.append((1, n + dn*chain_length, n + dn*chain_length+1,n + dn*chain_length+2))
+            ai.append((1, n + dn*chain_length + 1, n + dn*chain_length + 2,n + dn*chain_length + 3))
     t1 = time.process_time_ns()
     
-    angle_frame = pd.DataFrame(ai, columns=['type','ai','aj','ak'])
+    angle_frame = pd.DataFrame(ai, columns=['type','ai','aj','ak'], index=list(range(1, len(ai) + 1)))
 
     print(f'angles assembled in: {t1-t0}ns\n')
 
@@ -158,7 +159,7 @@ def make_dihedrals(coordinates):
     ai = []
     for dn in range(no_chains):
         for n in range(chain_length-3):
-            ai.append((1, n + dn*chain_length, n + dn*chain_length+1,n + dn*chain_length+2, n + dn*chain_length+3))
+            ai.append((1, n + dn*chain_length + 1, n + dn*chain_length + 2,n + dn*chain_length + 3, n + dn*chain_length + 4))
     dihedral_frame = pd.DataFrame(ai, columns=['type','ai','aj','ak', 'al'])
     t1=time.process_time_ns()
     print(f'dihedrals assembled in: {t1-t0}ns\n')
@@ -193,6 +194,9 @@ def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, m
     no_angles = len(angles)
     no_dihedrals = len(dihedrals)
     no_atom_types = 1
+    no_bond_types = 1
+    no_angle_types = 1 
+    no_dihedral_types = 1
 
     xlo, xhi = hi_lo[0][0], hi_lo[0][1]
     ylo, yhi = hi_lo[1][0], hi_lo[1][1]
@@ -202,7 +206,10 @@ def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, m
 {no_bonds} bonds
 {no_angles} angles
 {no_dihedrals} dihedrals\n
-{no_atom_types} atom types\n
+{no_atom_types} atom types
+{no_bond_types} bond types
+{no_angle_types} angle types
+{no_dihedral_types} dihedral types\n
 {xlo} {xhi} xlo xhi
 {ylo} {yhi} ylo yhi
 {zlo} {zhi} zlo zhi\n
@@ -214,7 +221,6 @@ def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, m
     #to work
     with open(filename, 'w') as f:
         f.write(f'{header}\nAtoms\n\n')
-
 
     coordinates.round(4).to_csv(filename, sep=' ', mode='a', header=False)
 
@@ -280,6 +286,7 @@ def read_lammps(filename, components):
 
         multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
         atom_frame.drop(['chain', 'atom','atom type','xv','yv','zv'], axis=1, inplace=True)
+        print(atom_frame)
 
         atom_frame = pd.DataFrame(atom_frame.values, index=multidex, columns=['x','y','z']).astype(float)
         atom_frame.sort_index(level='chain', inplace=True)

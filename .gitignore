@@ -3,3 +3,8 @@ ALLCGXYZ.npy
 __pycache__
 csvs
 *.txt
+RESTART
+OUT*
+log.*
+FINALCONFIG
+dump.*

@@ -1,4 +1,4 @@
-.0ammps script for united atom polymer simulation. This script will run several short simulation runs ramping up the time$
+#Lammps script for united atom polymer simulation. This script will run several short simulation runs ramping up the time$
 # 1. INITIALIZATION
 #allows pair, bond, bending and dihedral interactions
 atom_style molecular
