@@ -168,10 +168,9 @@ def write_lammps_config(config_dict:dict, filename:str, restart=False, write_dat
 def write_backmapping_protocol(filename='protocol.sh', head_dict:dict=None, 
                                modules:list=['slurm', 'racs-spack', 'python3'],
                                environment:str="spack load /sfoi75e",
-                               threads:int=1, no_iter:int=1):
+                               threads:int=1, no_iter:int=1, lammps_call:str='run'):
     """
-    if youre reading this and youre not me, know that this is me being lazy
-    and if you are me, stop being so lazy
+    fill me in later lazy man
     """
     parent = 'lammps_protocols'
     writename = os.path.join(parent, filename)
@@ -187,24 +186,20 @@ def write_backmapping_protocol(filename='protocol.sh', head_dict:dict=None,
                     continue
                 f.write(f'#SBATCH --{i}={head_dict[i]}\n')
 
+    if modules != None:
+        with open(writename, 'a') as f:
+            f.write('BD=$PWD\ncd $BD\n')
+            for module in modules:
+                f.write(f'module load {module}\n')
     with open(writename, 'a') as f:
-        f.write('BD=$PWD\ncd $BD\n')
-        for module in modules:
-            f.write(f'module load {module}\n')
-    
         for i in range(no_iter):
             # change this later to be able to make the input and outputfiles whatever you would want
             # might also  wanna make this less repetitive
-            f.write('srun lmp < in.PEsoft > OUTsoft\n')
+            f.write(f'lmp < in.PEsoft > OUTsoft\n')
             f.write('cp FINALCONFIG RESTART\n')
-            f.write('srun lmp < in.PEequil > OUTequil\n')
-            f.write('cp.FINALCONFIG RESTART\n')
+            f.write(f'lmp < in.PEequil > OUTequil\n')
+            f.write('cp FINALCONFIG RESTART\n')
             f.write('lmp read_restart FINALCONFIG\nlmp write_data outdata\n')
-            f.write('python3 backmap.py')
+            f.write('python3 backmap.py\n')
             f.write(f'cp lammps-AT-config backmap-round-{i}\n')
-        f.write('exit')
-
-
-
-
-    
+            f.write('exit')
