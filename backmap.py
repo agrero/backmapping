@@ -22,8 +22,6 @@ angles = mb.make_angles(backmapped)
 
 dihedrals = mb.make_dihedrals(backmapped)
 
-
-
 radius = 23.471697
 fudgers = [[random.uniform(-radius, radius) for i in range(3)] for i in range(300)]
 chain = list(range(300))
