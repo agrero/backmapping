@@ -34,7 +34,7 @@ default_soft_dict = {
     'units' : 'real',
     'read_data' : 'lammps-AT-config',
     'bond_style' : 'harmonic',
-    'bond_coef' : '1 450 1.54',
+    'bond_coeff' : '1 450 1.54',
     'special_bonds' : 'lj 0.0 0.0 0.0 angle no dihedral no',
     'angle_style' : 'harmonic',
     'angle_coeff' : '1 450 1.54',
