@@ -12,4 +12,4 @@ dump.*
 *.sh
 *-AT-*
 *.pbs
-backmap_round_*
+backmap-round-*
