@@ -21,14 +21,11 @@ if not 'lammps-AT-config' in os.listdir('lammps_protocols'):
     wp.write_lammps_input('lammps-AT-config', mb.reconfig_frame(test_data), 
                           bonds, angles, dihedrals, hi_lo, mass)
     
-
-
-
 #writing protocols/configurations
 bash_filename = 'bashmap.sh'
 test_modules = ['python']
 wp.write_backmapping_protocol(filename=bash_filename, modules=None, threads=5, no_iter=2,
-                              lammps_call='')
+                              lammps_call='start')
 soft_timesteps = [1.00]
 soft_run_nos = [20000]
 wp.write_lammps_config(config_dict=dc.default_soft_dict, filename='in.PEsoft', 
@@ -40,4 +37,5 @@ wp.write_lammps_config(config_dict=dc.default_peequil_dict, filename='in.PEequil
 
 # run the protocol
 os.chdir('lammps_protocols')
+os.system('chmod u+x bashmap.sh')
 os.system('bash bashmap.sh')
