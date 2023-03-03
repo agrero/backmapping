@@ -6,7 +6,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-from backmap import backmap as bm
+from backpack.mapback import backmap as bm
 
 def generate_test_data(input_coordinates, no_iterations):
     os.chdir("C:\Coding Projects\Guenza Lab\\backmapping\csvs")
