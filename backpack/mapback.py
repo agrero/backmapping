@@ -46,22 +46,26 @@ def gen_multidex(no_dex):
     print('indexing atoms')
     t0 = time.process_time_ns()
     if no_dex.index.names != ['atom', 'chain']:
-        print('incorrect format detected, rectifying the situation!')
+        print('incorrect format detected. processing. PROCESSING!')
         print('assuming each coordinate is its own chain.')
-        m = [(x,1) for x in range(len(no_dex))]
+        m = [(x,x) for x in range(len(no_dex))]
         multidex = pd.MultiIndex.from_tuples(m, names=['chain','atom'])
         no_dex = pd.DataFrame(data=no_dex.values, index=multidex)
         
+
     #maybe make this work for non homogenous systems later
     print('assuming a homogenous system')
     no_mono = len(no_dex.index.get_level_values('atom').unique())
     no_chains = len(no_dex.index.get_level_values('chain').unique())
     chain_length = int(no_mono / no_chains)
+
     print(f"chain number:\t{no_chains}\nmonomer number:\t{no_mono}")
+
 
     chain = sum([[x+1] * chain_length for x in range(0, no_chains)], [])
     atom_1 = [1 + 2*x for x in range(no_mono)]
     atom_2 = [1 + 2*x+1 for x in range(no_mono)]
+
 
     m1 = [(chain[i], atom_1[i]) for i in range(0, len(atom_1))]
     m2 = [(chain[i], atom_2[i]) for i in range(0, len(atom_2))]
@@ -184,3 +188,8 @@ def backmap(input_coordinates):
     t1=time.process_time_ns()
     print(f'backmapping completed in: {t1-t0}ns\n')
     return merged
+
+def generate_test_data(no_monomers=10, bounds=10):
+    xyz = [[random.uniform(-bounds, bounds) for i in range(3)] for i in range(no_monomers)]
+    coordinates = pd.DataFrame(xyz, columns=['x','y','z'])
+    return backmap(coordinates)
