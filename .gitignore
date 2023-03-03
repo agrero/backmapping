@@ -8,3 +8,7 @@ OUT*
 log.*
 FINALCONFIG
 dump.*
+*PE*
+*.sh
+*-AT-*
+*.pbs
