@@ -119,7 +119,7 @@ def read_lammps(filename, components):
 
         multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
         atom_frame.drop(['chain', 'atom','atom type','xv','yv','zv'], axis=1, inplace=True)
-        print(atom_frame)
+        
 
         atom_frame = pd.DataFrame(atom_frame.values, index=multidex, columns=['x','y','z']).astype(float)
         atom_frame.sort_index(level='chain', inplace=True)
@@ -131,6 +131,8 @@ def read_lammps_2(filepath):
     We need to test to make sure that 'Atoms' is the beginning section before each 
     set of coordinates, honestly reading in the header isn't that important
     since we only need the coordinates and Masses
+
+    ok cool so annotate this and do the mass thing
     """
 
     with open(filepath, 'r') as f:
@@ -171,8 +173,22 @@ def read_lammps_2(filepath):
         atoms = sections[header_end_ndx+2:header_end_ndx+atom_no+2]
         atom_split = [i.split(' ') for i in atoms]
 
+        columns = ['atom', 'chain', 'atom type', 'x', 'y', 'z', 'xv', 'yv', 'zv']
+        if len(atom_split[0]) == 6:
+            columns = columns[0:6]
+            drop_columns = ['chain', 'atom', 'atom type']
+            atom_frame = pd.DataFrame(data=atom_split, columns=columns)
+            multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
+            atom_frame.drop(drop_columns, axis=1, inplace=True)
+        else:    
+            drop_columns = ['chain', 'atom', 'atom type', 'xv', 'yv', 'zv']
+            atom_frame = pd.DataFrame(data=atom_split, columns=columns)
+            multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
+            atom_frame.drop(drop_columns, axis=1, inplace=True)
 
-        return pd.DataFrame(atom_split)
+        atom_frame = pd.DataFrame(atom_frame.values, index=multidex, columns=['x','y','z']).astype(float)
+
+        return atom_frame
                 
 
 def write_backmapping_protocol(filename='protocol.sh',

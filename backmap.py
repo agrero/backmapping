@@ -10,7 +10,9 @@ import random
 components = ['Atoms # molecular', 'Velocities', 'Bonds', 'Angles', 'Dihedrals']
 
 parent = 'lammps_protocols'
-initial_data = wp.read_lammps('outdata', components)
+filename = 'outdata'
+path = os.path.join(parent, filename)
+initial_data = wp.read_lammps_2(path)
 
 backmapped = mb.backmap(initial_data)
 
@@ -20,6 +22,6 @@ angles = mb.make_angles(backmapped)
 dihedrals = mb.make_dihedrals(backmapped)
 
 hilo = [[-23.471697,23.471697],[-23.471697,23.471697],[-23.471697,23.471697]]
-mb.write_lammps_input('lammps-AT-config',coord, bonds, angles, dihedrals, hilo, 17.0)
+wp.write_lammps_input('lammps-AT-config-2',coord, bonds, angles, dihedrals, hilo, 17.0)
 
 #os.system can be used to put things on the console
