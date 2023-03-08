@@ -127,18 +127,53 @@ def read_lammps(filename, components):
         return atom_frame
 
 def read_lammps_2(filepath):
+    """
+    We need to test to make sure that 'Atoms' is the beginning section before each 
+    set of coordinates, honestly reading in the header isn't that important
+    since we only need the coordinates and Masses
+    """
 
     with open(filepath, 'r') as f:
         text = f.read()
         sections = text.split('\n')
-        header_end_ndx = 0
 
+        # pull the header from the text
+        header_end_ndx = 0
         for ndx, i in enumerate(sections):
             if 'Atoms' in i:
                 header_end_ndx = ndx
                 break
-        return header_end_ndx
-        
+        header = sections[0:header_end_ndx]
+
+        # take the header and get the indices to slice the specific sections
+        header_section_ndxs = []
+        for ndx, i in enumerate(header):
+            if len(header_section_ndxs) == 0:
+                if i == '':
+                    header_section_ndxs.append((0, ndx))
+                    continue
+            if i == '':
+                header_section_ndxs.append((header_section_ndxs[-1][-1],ndx))
+
+        header_sections = []
+        for ndx, i in enumerate(header_section_ndxs):
+            if ndx == 0:
+                header_sections.append((header[i[0]:i[1]]))
+            else:   
+                header_sections.append((header[i[0]+1:i[1]]))
+
+        summation = sum(header_sections[-2:], [])
+        fixed_header_section = header_sections[:-2]
+        fixed_header_section.append(summation)
+
+        atom_no = int(fixed_header_section[1][0].split(' ')[0])
+
+        atoms = sections[header_end_ndx+2:header_end_ndx+atom_no+2]
+        atom_split = [i.split(' ') for i in atoms]
+
+
+        return pd.DataFrame(atom_split)
+                
 
 def write_backmapping_protocol(filename='protocol.sh',
                                head_dict:dict=None, 

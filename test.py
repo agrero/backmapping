@@ -20,7 +20,7 @@ for i in range(6):
 file_1 = 'lammps-AT-config'
 file_2 = 'outdata'
 
-initial_input = os.path.join('lammps_protocols', 'lammps-AT-config')
+initial_input = os.path.join('lammps_protocols', file_1)
 
 pastor = wp.read_lammps_2(initial_input)
 
