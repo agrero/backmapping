@@ -1,4 +1,5 @@
 from backpack import mapback as mb
+from backpack import writepack as wp
 import pandas as pd
 import os
 import random
@@ -6,10 +7,10 @@ import random
 # notes
 # why not have a python file that can write a lammps protocol? like duh haha
 
-components = ['LAMMPS data file via write_data, version 7 Jan 2022, timestep = 80842034',
-              'Atoms # molecular', 'Velocities', 'Bonds', 'Angles', 'Dihedrals']
+components = ['Atoms # molecular', 'Velocities', 'Bonds', 'Angles', 'Dihedrals']
 
-initial_data = mb.read_lammps('outdata', components)
+parent = 'lammps_protocols'
+initial_data = wp.read_lammps('outdata', components)
 
 backmapped = mb.backmap(initial_data)
 

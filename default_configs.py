@@ -18,7 +18,7 @@ default_peequil_dict ={
     'dihedral_coeff' : '* 1.14110, -0.27084 3.143 0.0',
     'mass' : '* 14.0',
     'pair_style' : 'lj/mdf 12.0 14.0',
-    'pair_coeff' : '1 1 0 0.0912 2.95 12.0 14.0',
+    'pair_coeff' : '1 1 0.0912 3.95 12.0 14.0',
     'neigh_modify' : 'every 1 delay 0 check yes',
     'minimize' : '1.0e-4 1.0e-6 1000 1000',
     'thermo_style' : 'custom step temp press ke pe etotal',
@@ -51,7 +51,6 @@ default_soft_dict = {
     'thermo_modify' : 'lost warn',
     'thermo' : '1000',
     'dump' : 'coords all atom 1 dump.xyz.dat',
-    'dump_modify' : 'coords scale no',
 }
 # maybe later we try to do the run nos and timesteps like we did the beginning and end things 
 # in the backmapping protocol writing

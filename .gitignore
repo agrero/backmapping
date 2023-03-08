@@ -10,6 +10,7 @@ FINALCONFIG
 dump.*
 *PE*
 *.sh
-*-AT-*
+restart.dat.*
 *.pbs
 backmap-round-*
+in.*

@@ -5,8 +5,6 @@ LAMMPS UA chain data file
 
 1 atom types
 1 bond types
-1 angle types
-1 dihedral types
 
 -23.471697 23.471697 xlo xhi
 -23.471697 23.471697 ylo yhi
