@@ -104,7 +104,7 @@ def read_lammps(filename, components):
             clean_sections.append(i)
         #can change this later but will only return atoms for backmapping
         atoms = clean_sections[1][1:]
-        cleaned_atoms = []
+        cleaned_atoms = [i.split()]
         #i should change it so i'm not writiing files with tabs but instead spaces
         for i in atoms:
             cleaned_atoms.append(i.split(' '))

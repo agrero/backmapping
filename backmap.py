@@ -6,6 +6,7 @@ import random
 
 # notes
 # why not have a python file that can write a lammps protocol? like duh haha
+# sbatch hostname.batch 
 
 components = ['Atoms # molecular', 'Velocities', 'Bonds', 'Angles', 'Dihedrals']
 

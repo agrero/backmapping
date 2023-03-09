@@ -5,6 +5,8 @@ import default_configs as dc
 import os
 
 # checking for dependent directories
+# so i might need to have a thing to check the boundaries of each of the 
+# atoms as i think some are being fudged outside the box
 dir_list = os.listdir()
 
 if not 'lammps_protocols' in dir_list:
@@ -23,7 +25,7 @@ if not 'lammps-AT-config' in os.listdir('lammps_protocols'):
 #writing protocols/configurations
 bash_filename = 'bashmap.sh'
 test_modules = ['python']
-wp.write_backmapping_protocol(filename=bash_filename, modules=None, threads=5, no_iter=2)
+wp.write_backmapping_protocol(filename=bash_filename, head_dict=dc.default_workflow_dict, threads=5, no_iter=2)
 soft_timesteps = [1.00]
 soft_run_nos = [20000]
 wp.write_lammps_config(config_dict=dc.default_soft_dict, 

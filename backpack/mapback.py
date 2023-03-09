@@ -189,6 +189,22 @@ def backmap(input_coordinates):
     print(f'backmapping completed in: {t1-t0}ns\n')
     return merged
 
+def check_validity(dataframe, box_bounds):
+    query = ''
+    xyz= ['x', 'y', 'z']
+    for i in xyz:
+        if i == 'z':
+            query += f'{i} > {box_bounds} or {i} < -{box_bounds}'
+        else:    
+            query += f'{i} > {box_bounds} or {i} < -{box_bounds} or '
+    # this might be the fastest way to do it, it'll get fixed when the system equils 
+    print(len(dataframe.query(query)))
+    for i in xyz:
+        dataframe.loc[dataframe[f'{i}'] > box_bounds, f'{i}'] = box_bounds
+        dataframe.loc[dataframe[f'{i}'] < -box_bounds, f'{i}'] = -box_bounds
+
+    return dataframe
+
 def generate_test_data(no_monomers=10, bounds=10):
     xyz = [[random.uniform(-bounds, bounds) for i in range(3)] for i in range(no_monomers)]
     coordinates = pd.DataFrame(xyz, columns=['x','y','z'])

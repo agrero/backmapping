@@ -20,8 +20,10 @@ for i in range(6):
 file_1 = 'lammps-AT-config'
 file_2 = 'outdata'
 
-initial_input = os.path.join('lammps_protocols', file_2)
+initial_input = os.path.join('lammps_protocols', file_1)
 
 pastor = wp.read_lammps_2(initial_input)
-
-print(pastor)
+hilo=23.471697
+que = mb.check_validity(pastor, hilo)
+print(que)
+#print(pastor.query("x > 23.471697 or x < -23.471697 or y > 23.471697 or y < -23.471697 or z > 23.471697 or z < -23.471697"))
