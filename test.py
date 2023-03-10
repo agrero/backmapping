@@ -24,6 +24,8 @@ initial_input = os.path.join('lammps_protocols', file_1)
 
 pastor = wp.read_lammps_2(initial_input)
 hilo=23.471697
-que = mb.check_validity(pastor, hilo)
+que = mb.backmap(pastor, hilo)
 print(que)
+
+
 #print(pastor.query("x > 23.471697 or x < -23.471697 or y > 23.471697 or y < -23.471697 or z > 23.471697 or z < -23.471697"))

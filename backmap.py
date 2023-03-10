@@ -11,11 +11,11 @@ import random
 components = ['Atoms # molecular', 'Velocities', 'Bonds', 'Angles', 'Dihedrals']
 
 parent = 'lammps_protocols'
-filename = 'outdata'
+filename = 'lammps-AT-config_copy'
 path = os.path.join(parent, filename)
 initial_data = wp.read_lammps_2(path)
 
-backmapped = mb.backmap(initial_data)
+backmapped = mb.backmap(initial_data, 23.471697)
 
 bonds = mb.make_bonds(backmapped)
 coord = mb.reconfig_frame(backmapped)

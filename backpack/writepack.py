@@ -176,19 +176,17 @@ def read_lammps_2(filepath):
         columns = ['atom', 'chain', 'atom type', 'x', 'y', 'z', 'xv', 'yv', 'zv']
         if len(atom_split[0]) == 6:
             columns = columns[0:6]
-            drop_columns = ['chain', 'atom', 'atom type']
+            drop_columns = ['atom type']
             atom_frame = pd.DataFrame(data=atom_split, columns=columns)
-            multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
+            atom_frame = atom_frame.set_index(['chain', 'atom'])
             atom_frame.drop(drop_columns, axis=1, inplace=True)
         else:    
-            drop_columns = ['chain', 'atom', 'atom type', 'xv', 'yv', 'zv']
+            drop_columns = ['atom type', 'xv', 'yv', 'zv']
             atom_frame = pd.DataFrame(data=atom_split, columns=columns)
-            multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
+            atom_frame = atom_frame.set_index(['chain', 'atom'])
             atom_frame.drop(drop_columns, axis=1, inplace=True)
 
-        atom_frame = pd.DataFrame(atom_frame.values, index=multidex, columns=['x','y','z']).astype(float)
-
-        return atom_frame
+        return atom_frame.astype(float)
                 
 
 def write_backmapping_protocol(filename='protocol.sh',
