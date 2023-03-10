@@ -2,18 +2,24 @@
 
 import pandas as pd
 import os
+from backpack import mapback as mb
 
-def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, mass):
+def write_lammps_input(filename, coordinates, hi_lo, mass):
     """
     bad bad lazy programmer
     """
     parent = 'lammps_protocols'
     writename = os.path.join(parent, filename)
+
+    bonds = mb.make_bonds(coordinates)
+    angles = mb.make_angles(coordinates)
+    dihedrals = mb.make_dihedrals(coordinates)
     
     no_atoms = len(coordinates)
     no_bonds = len(bonds)
     no_angles = len(angles)
     no_dihedrals = len(dihedrals)
+
     no_atom_types = 1
     no_bond_types = 1
     no_angle_types = 1 
@@ -42,10 +48,8 @@ def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, m
     with open(writename, 'w') as f:
         f.write(f'{header}\nAtoms\n\n')
 
-    coordinates.round(4).to_csv(writename, sep=' ', mode='a', header=False)
+        coordinates.round(4).to_csv(writename, sep=' ', mode='a', header=False)
 
-    # checking to ensure these things actually exist
-    # its science so its all fake but you get what i mean
     if no_bonds != 0:
         with open(writename, 'a') as f:
             f.write('\nBonds\n\n')
@@ -63,68 +67,6 @@ def write_lammps_input(filename, coordinates, bonds, angles, dihedrals, hi_lo, m
             f.write('\nDihedrals\n\n')
     
         dihedrals.to_csv(writename, sep=' ', mode='a', header=False)
-
-def read_lammps(filename, components):
-    """
-    Current issues:
-
-    1) it is not properly reading in the file after running in lammps
-        a) current solution i am thinking of is reading each line of the header and stopping at Atoms.
-        once we can then split 
-
-    The first line of these out files aren't consistent so should just make the header the 
-    initial row to the first section (Atoms # molecular) 
-
-    Components are the components of the specific lammps file. IE Atoms, Bonds, Dihedrals.
-    """
-    parent = 'lammps_protocols'
-    writename = os.path.join(parent, filename)
-    with open(writename, 'r') as f:
-        text = f.read()
-
-        sections = text.split('\n')
-        section_ndxs = [sections.index(i) for i in components]
-
-        comp = []
-        #header = sections[0:section_ndxs[0]]
-
-        for ndx, i in enumerate(section_ndxs):
-            try:
-                slice = sections[i:section_ndxs[ndx+1]]
-                comp.append(slice)
-            except:
-                slice = sections[i:]
-                comp.append(slice)
-        
-        clean_sections = []
-        for i in comp:
-            ndxs = [1,-1]
-            for j in ndxs:
-                del i[j]
-            clean_sections.append(i)
-        #can change this later but will only return atoms for backmapping
-        atoms = clean_sections[1][1:]
-        cleaned_atoms = [i.split()]
-        #i should change it so i'm not writiing files with tabs but instead spaces
-        for i in atoms:
-            cleaned_atoms.append(i.split(' '))
-
-        columns = ['atom', 'chain', 'atom type', 'x', 'y', 'z', 'xv', 'yv', 'zv']
-        try:
-            atom_frame = pd.DataFrame(data=cleaned_atoms, columns=columns)
-        except:
-            for i in atoms:
-                cleaned_atoms.append(i.split('\t'))
-            atom_frame = pd.DataFrame(data=cleaned_atoms, columns=columns)
-
-        multidex = pd.MultiIndex.from_frame(atom_frame.iloc[:,:2])
-        atom_frame.drop(['chain', 'atom','atom type','xv','yv','zv'], axis=1, inplace=True)
-        
-
-        atom_frame = pd.DataFrame(atom_frame.values, index=multidex, columns=['x','y','z']).astype(float)
-        atom_frame.sort_index(level='chain', inplace=True)
-
-        return atom_frame
 
 def read_lammps_2(filepath):
     """
@@ -187,8 +129,8 @@ def read_lammps_2(filepath):
             atom_frame.drop(drop_columns, axis=1, inplace=True)
 
         return atom_frame.astype(float)
-                
 
+#change me to write what's in line with what is working on Talapas
 def write_backmapping_protocol(filename='protocol.sh',
                                head_dict:dict=None, 
                                threads=5,
@@ -259,6 +201,8 @@ def read_lammps_header(filepath):
             
     return cleaned_components
 
+
+#should add a section in here to output movies! in line with what we have on talapas
 def write_lammps_config(config_dict:dict, 
                         filename:str, 
                         initial_input:str='lammps-AT-config', 

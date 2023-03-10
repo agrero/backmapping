@@ -24,7 +24,7 @@ def fudge_position(data, radius=1):
 
     new_data = data_xyz.values + fudgers
     t1 = time.time()
-    print(f'fudged locations in: {t1-t0}ns\n')
+    print(f'fudged locations in: {t1-t0}s\n')
 
     return new_data
 
@@ -95,6 +95,7 @@ def make_bonds(coordinates):
     no_chains = len(coordinates.index.get_level_values('chain').unique())
     chain_length = int(no_mono/no_chains)
 
+    #can do this as a comprehension
     ai = []
     for dn in range(no_chains):
         for n in range(chain_length-1):
@@ -200,7 +201,7 @@ def backmap(input_coordinates, box_bounds):
         pd.DataFrame(input_coordinates.values, multidex_1),
         pd.DataFrame(fudged.values, multidex_2),
     ])
-    #problem occurs before here
+
     merged.sort_index(level='chain', inplace=True)
     merged.rename(columns={0:'x', 1:'y', 2:'z'}, inplace=True)
     print('checking boundary conditions')
