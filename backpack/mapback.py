@@ -15,7 +15,7 @@ def fudge_position(data, radius=1):
 
     Returns a 'fudged' dataframe of the original input dataframe.
     """
-    print('fudging location values')
+    #print('fudging location values')
     t0 = time.time()
     fudgers = [[random.uniform(-radius, radius) for i in range(3)] for i in range(len(data))]
 
@@ -24,7 +24,7 @@ def fudge_position(data, radius=1):
 
     new_data = data_xyz.values + fudgers
     t1 = time.time()
-    print(f'fudged locations in: {t1-t0}s\n')
+    #print(f'fudged locations in: {t1-t0}s\n')
 
     return new_data
 
@@ -43,7 +43,7 @@ def gen_multidex(no_dex):
     """
 
     # correctly formatting indices
-    print('indexing atoms')
+    #print('indexing atoms')
     t0 = time.time()
     print(no_dex.index.names)
     # this shit is kinda broken
@@ -56,12 +56,12 @@ def gen_multidex(no_dex):
 
 
     #maybe make this work for non homogenous systems later
-    print('assuming a homogenous system')
+    #print('assuming a homogenous system')
     no_mono = len(no_dex.index.get_level_values('atom').unique())
     no_chains = len(no_dex.index.get_level_values('chain').unique())
     chain_length = int(no_mono / no_chains)
 
-    print(f"chain number:\t{no_chains}\nmonomer number:\t{no_mono}")
+    #print(f"chain number:\t{no_chains}\nmonomer number:\t{no_mono}")
 
 
     chain = sum([[x+1] * chain_length for x in range(0, no_chains)], [])
@@ -75,7 +75,7 @@ def gen_multidex(no_dex):
     multidex_1 = pd.MultiIndex.from_tuples(m1, names=['chain', 'atom'])
     multidex_2 = pd.MultiIndex.from_tuples(m2, names=['chain', 'atom'])
     t1 = time.time()
-    print(f'multidex assembled in: {t1-t0}s\n')
+    #print(f'multidex assembled in: {t1-t0}s\n')
     
     return multidex_1, multidex_2   
 
@@ -89,7 +89,7 @@ def make_bonds(coordinates):
     """
     #index | type | ai | aj
     #retrieve the number of chains and how long each chain is
-    print('assembling bonds')
+    #print('assembling bonds')
     t0=time.time()
     no_mono = len(coordinates.index.get_level_values('atom').unique())
     no_chains = len(coordinates.index.get_level_values('chain').unique())
@@ -103,7 +103,7 @@ def make_bonds(coordinates):
 
     bond_frame = pd.DataFrame(ai, columns=['type','ai','aj'], index=list(range(1, len(ai) + 1)))
     t1 = time.time()
-    print(f'bonds assembled in: {t1-t0}s\n')
+    #print(f'bonds assembled in: {t1-t0}s\n')
     return bond_frame
 
 def reconfig_frame(coordinates):
@@ -113,14 +113,14 @@ def reconfig_frame(coordinates):
     reconfigures a frame so that the indexing is more in line with a lammps input 
     file by changing the index position and adding an atom type column.
     """
-    print('reconfiguring frame')
+    #print('reconfiguring frame')
     t0=time.time()
     df = coordinates
     df = df.swaplevel(0, 1, axis=0)
     typ_array = [1] * (len(df))
     df.insert(0, 'type', typ_array)
     t1=time.time()
-    print(f'frame reconfigured in: {t1-t0}ns\n')
+    #print(f'frame reconfigured in: {t1-t0}ns\n')
     return df
 
 def make_angles(coordinates):
@@ -133,7 +133,7 @@ def make_angles(coordinates):
         """
     #index | type | ai | aj
     #retrieve the number of chains and how long each chain is
-    print('assembling angles')
+    #print('assembling angles')
     t0 = time.time()
     no_mono = len(coordinates.index.get_level_values('atom').unique())
     no_chains = len(coordinates.index.get_level_values('chain').unique())
@@ -147,7 +147,7 @@ def make_angles(coordinates):
     
     angle_frame = pd.DataFrame(ai, columns=['type','ai','aj','ak'], index=list(range(1, len(ai) + 1)))
 
-    print(f'angles assembled in: {t1-t0}ns\n')
+    #print(f'angles assembled in: {t1-t0}ns\n')
 
     return angle_frame
 
@@ -156,7 +156,7 @@ def make_dihedrals(coordinates):
     """
     wow this looks familiar
     """
-    print('assembling dihedrals')
+    #print('assembling dihedrals')
     t0=time.time()
     no_mono = len(coordinates.index.get_level_values('atom').unique())
     no_chains = len(coordinates.index.get_level_values('chain').unique())
@@ -168,7 +168,7 @@ def make_dihedrals(coordinates):
             ai.append((1, n + dn*chain_length + 1, n + dn*chain_length + 2,n + dn*chain_length + 3, n + dn*chain_length + 4))
     dihedral_frame = pd.DataFrame(ai, columns=['type','ai','aj','ak', 'al'])
     t1=time.time()
-    print(f'dihedrals assembled in: {t1-t0}ns\n')
+    #print(f'dihedrals assembled in: {t1-t0}ns\n')
 
     return dihedral_frame
 
@@ -182,7 +182,7 @@ def check_validity(dataframe, box_bounds):
         else:    
             query += f'{i} > {box_bounds} or {i} < -{box_bounds} or '
     # this might be the fastest way to do it, it'll get fixed when the system equils 
-    print(len(dataframe.query(query)))
+    #print(len(dataframe.query(query)))
     for i in xyz:
         dataframe.loc[dataframe[f'{i}'] > box_bounds, f'{i}'] = box_bounds
         dataframe.loc[dataframe[f'{i}'] < -box_bounds, f'{i}'] = -box_bounds
