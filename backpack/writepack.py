@@ -2,7 +2,7 @@
 
 import pandas as pd
 import os
-from backpack import mapback as mb
+import mapback as mb
 
 def write_lammps_input(filename, coordinates, hi_lo, mass):
     """

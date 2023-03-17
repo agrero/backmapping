@@ -1,6 +1,8 @@
 from backpack import mapback as mb
 from backpack import writepack as wp
+from backpack import mapanly as ma
 import default_configs as dc
+
 
 import os 
 
@@ -19,13 +21,9 @@ for i in range(6):
     """
 file_1 = 'lammps-AT-config'
 file_2 = 'outdata'
-
 initial_input = os.path.join('lammps_protocols', file_1)
-
 pastor = wp.read_lammps_2(initial_input)
-hilo=23.471697
-que = mb.backmap(pastor, hilo)
-print(que)
 
+bond_lens = ma.get_bond_len(pastor)
+print(bond_lens)
 
-#print(pastor.query("x > 23.471697 or x < -23.471697 or y > 23.471697 or y < -23.471697 or z > 23.471697 or z < -23.471697"))

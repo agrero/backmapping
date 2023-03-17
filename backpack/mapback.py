@@ -75,7 +75,7 @@ def gen_multidex(no_dex):
     multidex_1 = pd.MultiIndex.from_tuples(m1, names=['chain', 'atom'])
     multidex_2 = pd.MultiIndex.from_tuples(m2, names=['chain', 'atom'])
     t1 = time.time()
-    print(f'multidex assembled in: {t1-t0}ns\n')
+    print(f'multidex assembled in: {t1-t0}s\n')
     
     return multidex_1, multidex_2   
 
@@ -103,7 +103,7 @@ def make_bonds(coordinates):
 
     bond_frame = pd.DataFrame(ai, columns=['type','ai','aj'], index=list(range(1, len(ai) + 1)))
     t1 = time.time()
-    print(f'bonds assembled in: {t1-t0}ns\n')
+    print(f'bonds assembled in: {t1-t0}s\n')
     return bond_frame
 
 def reconfig_frame(coordinates):
@@ -214,4 +214,7 @@ def backmap(input_coordinates, box_bounds):
 def generate_test_data(no_monomers=10, bounds=10):
     xyz = [[random.uniform(-bounds, bounds) for i in range(3)] for i in range(no_monomers)]
     coordinates = pd.DataFrame(xyz, columns=['x','y','z'])
-    return backmap(coordinates)
+    multi_dex = gen_multidex(coordinates)
+    print(multi_dex)
+    coordinates.reindex(multi_dex)
+    return coordinates
