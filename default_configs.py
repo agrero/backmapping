@@ -1,5 +1,3 @@
-from backpack import writepack as wp
-
 #######
 # Parameters for writing lammps config
 #######

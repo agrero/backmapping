@@ -2,7 +2,8 @@
 
 import pandas as pd
 import os
-import mapback as mb
+from backpack import mapback as mb
+
 
 def write_lammps_input(filename, coordinates, hi_lo, mass):
     """
@@ -48,25 +49,23 @@ def write_lammps_input(filename, coordinates, hi_lo, mass):
     with open(writename, 'w') as f:
         f.write(f'{header}\nAtoms\n\n')
 
-        coordinates.round(4).to_csv(writename, sep=' ', mode='a', header=False)
 
-    if no_bonds != 0:
-        with open(writename, 'a') as f:
+    coordinates.to_csv(writename, sep=' ', mode='a', header=False)
+    with open(writename, 'a') as f:
+        if no_bonds != 0:
             f.write('\nBonds\n\n')
     
-        bonds.to_csv(writename, sep=' ', mode='a', header=False)
-
-    if no_angles != 0:
-        with open(writename, 'a') as f:
+    bonds.to_csv(writename, sep=' ', mode='a', header=False)
+    with open(writename, 'a') as f:
+        if no_angles != 0:
             f.write('\nAngles\n\n')
     
-        angles.to_csv(writename, sep=' ', mode='a', header=False)
-
-    if no_dihedrals != 0:
-        with open(writename, 'a') as f:
+    angles.to_csv(writename, sep=' ', mode='a', header=False)
+    with open(writename, 'a') as f:
+        if no_dihedrals != 0:
             f.write('\nDihedrals\n\n')
     
-        dihedrals.to_csv(writename, sep=' ', mode='a', header=False)
+    dihedrals.to_csv(writename, sep=' ', mode='a', header=False)
 
 def read_lammps_2(filepath):
     """
@@ -122,6 +121,10 @@ def read_lammps_2(filepath):
             atom_frame = pd.DataFrame(data=atom_split, columns=columns)
             atom_frame = atom_frame.set_index(['chain', 'atom'])
             atom_frame.drop(drop_columns, axis=1, inplace=True)
+        elif len(atom_split[0]) == 5:
+            columns = ['atom', 'chain', 'x', 'y', 'z']
+            atom_frame = pd.DataFrame(data=atom_split, columns=columns)
+            atom_frame = atom_frame.set_index(['chain', 'atom'])
         else:    
             drop_columns = ['atom type', 'xv', 'yv', 'zv']
             atom_frame = pd.DataFrame(data=atom_split, columns=columns)

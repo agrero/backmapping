@@ -1,5 +1,5 @@
 Data.xlsx
-ALLCGXYZ.npy
+*.npy
 __pycache__
 csvs
 *.txt

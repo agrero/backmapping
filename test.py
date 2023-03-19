@@ -1,29 +1,25 @@
+
+import pandas as pd
+import os 
+import numpy as np
+
 from backpack import mapback as mb
 from backpack import writepack as wp
-from backpack import mapanly as ma
-import default_configs as dc
 
 
-import os 
+# code here is for talapas to run the bond angle and dihedral stuff
 
-"""import pandas as pd
+xyz = wp.read_lammps_2('lammps-AT-config')
+frame = pd.DataFrame(xyz)
+print(frame)
+"""chain = range(1, len(xyz[-1]) + 1)
 
-initial_data = {
-    'x': [1.0001, 2.0001, 3.0001],
-    'y': [1.0001, 2.0001, 3.0001],
-    'z': [1.0001, 2.0001, 3.0001]
-}
-initial_data = pd.DataFrame(initial_data)
+multidex = [(i,i) for i in chain]
+multidex = pd.MultiIndex.from_tuples(multidex, names=['atom','chain'])"""
+"""frame = pd.DataFrame(xyz[-1], columns=['x','y','z'], index=multidex)"""
 
-backmapped = mb.backmap(initial_data)
-for i in range(6):
-    backmapped = mb.backmap(backmapped)
-    """
-file_1 = 'lammps-AT-config'
-file_2 = 'outdata'
-initial_input = os.path.join('lammps_protocols', file_1)
-pastor = wp.read_lammps_2(initial_input)
 
-bond_lens = ma.get_bond_len(pastor)
-print(bond_lens)
 
+hilo=[[-50,50],[-50,50],[-50,50]]
+# max in the frame is 50
+wp.write_lammps_input('allcgxyz.lmp', coordinates=frame, hi_lo=hilo, mass=112.0)

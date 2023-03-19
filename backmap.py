@@ -4,11 +4,12 @@ import os
 
 
 parent = 'lammps_protocols'
-filename = 'lammps-AT-config_copy'
+filename = 'lammps-AT-config'
 path = os.path.join(parent, filename)
-initial_data = wp.read_lammps(path)
 
-backmapped = mb.backmap(initial_data, 23.471697)
+initial_data = wp.read_lammps_2(filename)
+
+backmapped = mb.backmap(initial_data, 50)
 
 coord = mb.reconfig_frame(backmapped)
 

@@ -146,5 +146,6 @@ data = pd.DataFrame(initial_data, index=mutlidex)
 bond_angle = get_bond_angles(data)
 dihedral_angle = get_dihedral_angles(data)
 print(dihedral_angle)
+print(bond_angle)
 #print(np.average(bond_angle))
 
