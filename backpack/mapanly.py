@@ -20,9 +20,15 @@ def get_bond_len(coordinates):
     # get the indices of each bond 
     no_chain = coordinates.reset_index(level='chain')
     no_chain.drop(labels=['chain'], axis=1, inplace=True)
-    ai = bonds.loc[:,'ai'].values.astype(int)
-    aj = bonds.loc[:,'aj'].values.astype(int)
-    
+
+    if type(list(no_chain.index.values)[0]) == np.dtype('int64'):
+        ai = bonds.loc[:,'ai'].values.astype(int)
+        aj = bonds.loc[:,'aj'].values.astype(int)
+    elif type(list(no_chain.index.values)[0]) == str:
+        ai = bonds.loc[:,'ai'].values.astype(str)
+        aj = bonds.loc[:,'aj'].values.astype(str)
+    else:
+        raise ValueError('expected np int64 or string for indices')
     # from previously retrieved indices, get the atom coordinates 
     xyz_1 = no_chain[no_chain.index.isin(ai)]
     xyz_1.reset_index(drop=True, inplace=True)
@@ -61,9 +67,16 @@ def get_bond_angles(coordinates):
     # may need to add a query here for ridiculous bond lengths 
     #   if the angle stuff is not fully apparent
     # remember to change this back to str when it works
-    ai_ind = angles.loc[:,'ai'].values.astype(str)
-    aj_ind = angles.loc[:,'aj'].values.astype(str)
-    ak_ind = angles.loc[:,'ak'].values.astype(str)
+    if type(list(no_chain.index.values)[0]) == np.dtype('int64'):
+        ai_ind = angles.loc[:,'ai'].values.astype(int)
+        aj_ind = angles.loc[:,'aj'].values.astype(int)
+        ak_ind = angles.loc[:,'ak'].values.astype(int)
+    elif type(list(no_chain.index.values)[0]) == str:        
+        ai_ind = angles.loc[:,'ai'].values.astype(str)
+        aj_ind = angles.loc[:,'aj'].values.astype(str)
+        ak_ind = angles.loc[:,'ak'].values.astype(str)
+    else:
+        raise ValueError('expected np int64 or string for indices')      
 
     # for reference, ai is the set of xyz coordinates for atom i in the angle
     ai = no_chain[no_chain.index.isin(ai_ind)]
@@ -94,11 +107,18 @@ def get_dihedral_angles(coordinates):
 
     no_chain = coordinates.reset_index(level='chain')
     no_chain.drop(labels=['chain'], axis=1, inplace=True)
-
-    ai_ind = dihedrals.loc[:,'ai'].values.astype(str)
-    aj_ind = dihedrals.loc[:,'aj'].values.astype(str)
-    ak_ind = dihedrals.loc[:,'ak'].values.astype(str)
-    al_ind = dihedrals.loc[:,'al'].values.astype(str)
+    if type(list(no_chain.index.values)[0]) == np.dtype('int64'):
+        ai_ind = dihedrals.loc[:,'ai'].values.astype(int)
+        aj_ind = dihedrals.loc[:,'aj'].values.astype(int)
+        ak_ind = dihedrals.loc[:,'ak'].values.astype(int)
+        al_ind = dihedrals.loc[:,'al'].values.astype(int)
+    elif type(list(no_chain.index.values)[0]) == str:
+        ai_ind = dihedrals.loc[:,'ai'].values.astype(str)
+        aj_ind = dihedrals.loc[:,'aj'].values.astype(str)
+        ak_ind = dihedrals.loc[:,'ak'].values.astype(str)
+        al_ind = dihedrals.loc[:,'al'].values.astype(str)
+    else:
+        raise ValueError('expected np int64 or string for indices')  
 
     ai = no_chain[no_chain.index.isin(ai_ind)]
     ai.reset_index(drop=True, inplace=True)
@@ -133,21 +153,9 @@ def get_dihedral_angles(coordinates):
 
     return pd.DataFrame(dihedral_angles)
     
-"""file = 'lammps-AT-config'
-parent = 'lammps_protocols'
-path = os.path.join(parent, file)
-#data = wp.read_lammps_2(path)
-initial_data = {
-    'x' : [24.969, 24.044, 22.785, 21.951, 23.672, 22.881, 23.691, 22.557],
-    'y' : [13.428, 12.661, 13.482, 13.670, 11.328, 10.326, 9.935, 9.096],
-    'z' : [30.692, 29.808, 29.543, 30.431, 30.466, 29.620, 28.389, 30.459]
-}
-multi_dex = [(1,1),(2,1),(3,1),(4,1),(5,2),(6,2),(7,2),(8,2)]
-mutlidex = pd.MultiIndex.from_tuples(multi_dex, names=['atom', 'chain'])
-data = pd.DataFrame(initial_data, index=mutlidex)"""
-
-
-def plot_bondlength(coordinates, filter_no=2, bin_width=.25):
+# these are going to plot the atoimistic view as a line and the histogram as the 
+# backmapped
+def plot_bondlength(coordinates, filter_no=2, bin_width=.25, xtick_dist=5):
 
     # get bond distances
     bond_distances = get_bond_len(coordinates)
@@ -155,28 +163,34 @@ def plot_bondlength(coordinates, filter_no=2, bin_width=.25):
 
     # get dist
     bin_form = np.arange(0, max(filtered) + bin_width, bin_width)
-    plt.hist(filtered, density=True, bins=bin_form)
-    plt.xticks(bin_form)
-    plt.ylabel('Probability')
+
+    y, binedges = np.histogram(filtered, bins=bin_form)
+
+    plt.hist(filtered, bins=bin_form, edgecolor='orange')
+
+    bincenters = 0.5 * (binedges[1:] + binedges[:-1])
+    plt.plot(bincenters, y, '-', c='black')
+    plt.xticks(np.arange(0, max(filtered) + bin_width, bin_width * xtick_dist))
+    plt.ylabel('Percentage')
     plt.xlabel('Bond Length')
 
     plt.show()
 
-def plot_bondangle(coordinates, bin_width=1):
+def plot_bondangle(coordinates, bin_width=1, xtick_dist=5):
 
     # get bond angles
     bond_angle = get_bond_angles(coordinates)
 
-    bin_form = np.arange(0, max(bond_angle) + bin_width, bin_width)
+    bin_form = np.arange(min(bond_angle), max(bond_angle) + bin_width, bin_width)
 
     plt.hist(bond_angle, density=True, bins=bin_form)
-    plt.xticks(np.arange(0, max(bond_angle) + bin_width, bin_width * 2.))
-    plt.ylabel('Probability')
+    plt.xticks(np.arange(min(bond_angle), max(bond_angle) + bin_width, bin_width * xtick_dist))
+    plt.ylabel('Percentage')
     plt.xlabel('Bond Angle')
 
     plt.show()
 
-def plot_dihedral(coordinates, bin_width=1):
+def plot_dihedral(coordinates, bin_width=1, xtick_dist=6):
 
     # get dihedral angles
     dihedral_angle = get_dihedral_angles(coordinates)
@@ -185,8 +199,8 @@ def plot_dihedral(coordinates, bin_width=1):
 
     plt.hist(dihedral_angle, density=True, bins=bin_form)
 
-    plt.xticks(np.arange(-180, 180 + bin_width, bin_width * 6))
-    plt.ylabel('Probability')
+    plt.xticks(np.arange(-180, 180 + bin_width, bin_width * xtick_dist))
+    plt.ylabel('Percentage')
     plt.xlabel('Dihedral Angle')
 
     plt.show()
