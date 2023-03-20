@@ -17,17 +17,21 @@ multidex = pd.MultiIndex.from_tuples(multidex, names=['atom','chain'])"""
 parent = 'lammps_protocols'
 file = 'lammps-AT-config'
 
-data = np.load('ALLXYZ.npy')
-frame = pd.DataFrame(data[-1][0])
-frame.to_csv('atomistic.csv')
-values = []
-for i in data[-1]:
-    frame = pd.DataFrame(i)
-    values.append(list(i))
+data = pd.read_csv('atomistic.csv')
+print(data.columns.values)
+data.drop(axis=1,columns=['Unnamed: 0'], inplace=True)
 
-value_f = sum(values, [])
-value_frame = pd.DataFrame(value_f)
-value_frame.to_csv('atomistic.csv')
+# 30 monomers per 500 chains
+atoms= [i for i in range(1,len(data) + 1)]
+chain = [i for i in range(1,len(atoms)+1) for x in range(30)]
+m1 = [(atoms[i],chain[i]) for i in range(0, len(atoms))]
+
+multi_dex = pd.MultiIndex.from_tuples(m1, names=['atom','chain'])
+
+new_data = pd.DataFrame(data.values, index=multi_dex, columns=['x','y','z'])
+
+ma.plot_bondlength(new_data, filter_no=100, bin_width=0.1)
+
 #writename = os.path.join(parent, file)
 #coordinates = wp.read_lammps_2(writename)
 

@@ -20,8 +20,8 @@ def get_bond_len(coordinates):
     # get the indices of each bond 
     no_chain = coordinates.reset_index(level='chain')
     no_chain.drop(labels=['chain'], axis=1, inplace=True)
-    ai = bonds.loc[:,'ai'].values.astype(str)
-    aj = bonds.loc[:,'aj'].values.astype(str)
+    ai = bonds.loc[:,'ai'].values.astype(int)
+    aj = bonds.loc[:,'aj'].values.astype(int)
     
     # from previously retrieved indices, get the atom coordinates 
     xyz_1 = no_chain[no_chain.index.isin(ai)]
