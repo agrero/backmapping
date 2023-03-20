@@ -153,8 +153,7 @@ def get_dihedral_angles(coordinates):
 
     return pd.DataFrame(dihedral_angles)
     
-# these are going to plot the atoimistic view as a line and the histogram as the 
-# backmapped
+
 def plot_bondlength(coordinates, filter_no=2, bin_width=.25, xtick_dist=5):
 
     # get bond distances

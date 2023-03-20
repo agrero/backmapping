@@ -37,8 +37,8 @@ coordinates = wp.read_lammps_2(path)
 
 
 # uncomment these to download good plots
-ma.plot_bondlength(new_data, filter_no=100, bin_width=0.05, xtick_dist=5)
-ma.plot_bondlength(coordinates, filter_no=5, bin_width=0.2, xtick_dist=5)
+#ma.plot_bondlength(new_data, filter_no=100, bin_width=0.05, xtick_dist=5)
+#ma.plot_bondlength(coordinates, filter_no=5, bin_width=0.2, xtick_dist=5)
 
 #ma.plot_bondangle(new_data, bin_width=1, xtick_dist=8)
 #ma.plot_bondangle(coordinates, bin_width=1.5, xtick_dist=10.2)
