@@ -5,8 +5,7 @@ import default_configs as dc
 import os
 
 # checking for dependent directories
-# so i might need to have a thing to check the boundaries of each of the 
-# atoms as i think some are being fudged outside the box
+# need to update this to reflect the working code
 dir_list = os.listdir()
 
 if not 'lammps_protocols' in dir_list:

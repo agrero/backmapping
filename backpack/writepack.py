@@ -7,8 +7,14 @@ from backpack import mapback as mb
 
 def write_lammps_input(filename, coordinates, hi_lo, mass):
     """
-    bad bad lazy programmer
+    takes in a set of coordinates, box bounds, and mass of atoms and writes a lammps 
+    input file as a csv
+    
+    coordinates: xyz coordinates in lammps format
+    hi_lo: box bounds in the format of [[x_low, x_hi], [y_low, y_hi]]
+    mass: integer or float of a given mass of atom
     """
+    # writing the header of the file
     parent = 'lammps_protocols'
     writename = os.path.join(parent, filename)
 
@@ -45,10 +51,9 @@ def write_lammps_input(filename, coordinates, hi_lo, mass):
 {'1'} {mass}
 """
 
-    # theres a better way to do this
+   # write the body of the lammps file
     with open(writename, 'w') as f:
         f.write(f'{header}\nAtoms\n\n')
-
 
     coordinates.to_csv(writename, sep=' ', mode='a', header=False)
     with open(writename, 'a') as f:
@@ -69,11 +74,9 @@ def write_lammps_input(filename, coordinates, hi_lo, mass):
 
 def read_lammps_2(filepath):
     """
-    We need to test to make sure that 'Atoms' is the beginning section before each 
-    set of coordinates, honestly reading in the header isn't that important
-    since we only need the coordinates and Masses
-
-    ok cool so annotate this and do the mass thing
+    readin a lammps formated coordinates file and create a mutable dataframe from it
+    
+    filepath: the path to the xyz lammps coordinate file you want to read
     """
 
     with open(filepath, 'r') as f:
@@ -141,7 +144,7 @@ def write_backmapping_protocol(filename='protocol.sh',
                                environment:str="spack load /sfoi75e",
                                no_iter:int=1):
     """
-    fill me in later lazy man
+    Currently under construction, write the protocol by hand. Ignore for now.
     """
     parent = 'lammps_protocols'
     writename = os.path.join(parent, filename)

@@ -1,8 +1,16 @@
 # backmapping
-wello and helcome!
-i calculated about how long this would take me, but boy am i bad at math =>
-now go home
-
+- Below are the files and a general overview of what they do
+  - backpack (module)
+    - mapanly.py - takes in the dataframes of coordinates/bonds/dihedrals etc and 
+    outputs the bond lengths/angles of each chain
+    - mapback.py - all functions related to physically backmapping those course grained models
+    - writepack.py - all functions regarding reading and writing lammps formatted 
+    coordinate files
+  - backmap.py - run this to backmap a specified lammps configured coordinate file
+  - default_configs.py - default lammps configs as a dictionary 
+  - speed_test.py - used to test the speed of the backmapping algorithm with changing monomer no
+  - test.py - file for testing individual components
+  
 # stuff to get done
   - analysis package
     - need a series of functions to analyze the output of the backmapping workflow at each step

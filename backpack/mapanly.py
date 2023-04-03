@@ -57,7 +57,7 @@ def get_bond_angles(coordinates):
     # get the indices of each angle
     no_chain = coordinates.reset_index(level='chain')
     no_chain.drop(labels=['chain'], axis=1, inplace=True)
-    #print(no_chain)
+
     # may need to add a query here for ridiculous bond lengths 
     #   if the angle stuff is not fully apparent
     # remember to change this back to str when it works
@@ -73,9 +73,9 @@ def get_bond_angles(coordinates):
     ak = no_chain[no_chain.index.isin(ak_ind)]
     ak.reset_index(drop=True, inplace=True)
 
+    # calculating the bond angles
     angles = []
     for ndx, i in enumerate(ai.values):
-        #aj.loc[ndx].values
         ji = np.subtract(i,aj.loc[ndx].values)
         jk = np.subtract(ak.loc[ndx].values, aj.loc[ndx].values)
 
@@ -87,9 +87,13 @@ def get_bond_angles(coordinates):
     return pd.Series(angles)
 
 def get_dihedral_angles(coordinates):
-    """
+    """intakes a set of coordinates in lammps format, generates sets of coordinates to calculate
+    dihedral angles with them, and returns an array of said bond angles.
 
+    coordinates: a set of xyz coordinates in lammps format (as below)
+    atom | chain | x | y | z 
     """
+    # get dihedral angles 
     dihedrals = mb.make_dihedrals(coordinates)
 
     no_chain = coordinates.reset_index(level='chain')
@@ -109,6 +113,7 @@ def get_dihedral_angles(coordinates):
     al = no_chain[no_chain.index.isin(al_ind)]
     al.reset_index(drop=True, inplace=True)
 
+    # calculating dihedral angles
     dihedral_angles = []
     for ndx, i in enumerate(ai.values):
         #make this more in line with the other function
@@ -132,23 +137,16 @@ def get_dihedral_angles(coordinates):
         dihedral_angles.append(np.degrees(np.arctan2(y,x)))
 
     return pd.DataFrame(dihedral_angles)
-    
-"""file = 'lammps-AT-config'
-parent = 'lammps_protocols'
-path = os.path.join(parent, file)
-#data = wp.read_lammps_2(path)
-initial_data = {
-    'x' : [24.969, 24.044, 22.785, 21.951, 23.672, 22.881, 23.691, 22.557],
-    'y' : [13.428, 12.661, 13.482, 13.670, 11.328, 10.326, 9.935, 9.096],
-    'z' : [30.692, 29.808, 29.543, 30.431, 30.466, 29.620, 28.389, 30.459]
-}
-multi_dex = [(1,1),(2,1),(3,1),(4,1),(5,2),(6,2),(7,2),(8,2)]
-mutlidex = pd.MultiIndex.from_tuples(multi_dex, names=['atom', 'chain'])
-data = pd.DataFrame(initial_data, index=mutlidex)"""
-
 
 def plot_bondlength(coordinates, filter_no=2, bin_width=.25):
+    """
+    intakes the output of the bondlength function and plots the distribution of bond lengths 
+    as a count distribution.
 
+    coordinates: dataframe of bond lengths as explained above
+    filter_no: cutoff for bond length
+    bin_width: range of each bin the histogram uses.
+    """
     # get bond distances
     bond_distances = get_bond_len(coordinates)
     filtered = bond_distances.loc[lambda x : x < filter_no]
@@ -163,7 +161,12 @@ def plot_bondlength(coordinates, filter_no=2, bin_width=.25):
     plt.show()
 
 def plot_bondangle(coordinates, bin_width=1):
+    """
+    inputs the output of the bondangle function and plots it as histogram of indivdual counts
 
+    coordinates: bond angles as stated above
+    bin_width: range of each bin the histogram uses.
+    """
     # get bond angles
     bond_angle = get_bond_angles(coordinates)
 
@@ -177,7 +180,12 @@ def plot_bondangle(coordinates, bin_width=1):
     plt.show()
 
 def plot_dihedral(coordinates, bin_width=1):
+    """
+    inputs the output of the bondangle function and plots it as histogram of indivdual counts
 
+    coordinates: dihedral angles as stated above
+    bin_width: range of each bin the histogram uses.
+    """
     # get dihedral angles
     dihedral_angle = get_dihedral_angles(coordinates)
 
