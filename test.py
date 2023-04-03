@@ -18,7 +18,6 @@ parent = 'lammps_protocols'
 file = 'lammps-AT-config'
 
 data = pd.read_csv('atomistic.csv')
-print(data.columns.values)
 data.drop(axis=1,columns=['Unnamed: 0'], inplace=True)
 
 # 30 monomers per 500 chains
@@ -29,12 +28,20 @@ m1 = [(atoms[i],chain[i]) for i in range(0, len(atoms))]
 multi_dex = pd.MultiIndex.from_tuples(m1, names=['atom','chain'])
 
 new_data = pd.DataFrame(data.values, index=multi_dex, columns=['x','y','z'])
+path = os.path.join('lammps_protocols', 'lammps-AT-config')
+coordinates = wp.read_lammps_2(path)
 
-ma.plot_bondlength(new_data, filter_no=100, bin_width=0.1)
 
-#writename = os.path.join(parent, file)
-#coordinates = wp.read_lammps_2(writename)
 
-#ma.plot_bondlength(coordinates, filter_no=2, bin_width=.1)
-#ma.plot_bondangle(coordinates, bin_width=5)
-#ma.plot_dihedral(coordinates, bin_width=5)
+
+
+
+# uncomment these to download good plots
+#ma.plot_bondlength(new_data, filter_no=100, bin_width=0.05, xtick_dist=5)
+#ma.plot_bondlength(coordinates, filter_no=5, bin_width=0.2, xtick_dist=5)
+
+#ma.plot_bondangle(new_data, bin_width=1, xtick_dist=8)
+#ma.plot_bondangle(coordinates, bin_width=1.5, xtick_dist=10.2)
+
+#ma.plot_dihedral(new_data, bin_width=5, xtick_dist=10)
+#ma.plot_dihedral(coordinates, bin_width=5, xtick_dist=10)
